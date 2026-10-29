@@ -4,6 +4,7 @@ import { dataContent, saveData } from "./dataMsg.ts"
 import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, InteractionContextType, MessageFlags, DiscordAPIError, TextChannel, GuildMember } from "discord.js";
 import type { RESTPutAPIApplicationCommandsJSONBody, PollAnswerData, Message } from "discord.js"
 import "./activity.ts";
+import { serverIndexCommands } from "./serverIndexSetup.ts";
 import { styleText } from "./formatting.ts";
 import JSZip from "jszip";
 
@@ -364,6 +365,7 @@ const styleChoices = [
 ]
 
 const commands: RESTPutAPIApplicationCommandsJSONBody = [
+    ...serverIndexCommands,
     {
         type: ApplicationCommandType.ChatInput,
         name: "activity_chart",

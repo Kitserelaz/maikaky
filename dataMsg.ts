@@ -23,6 +23,12 @@ export const dataContent = JSON.parse(attachmentText) as {
             username: string
         }[]
     },
+    serverIndexes?: Record<Snowflake, {
+        webhookId: Snowflake,
+        webhookToken: string,
+        messageIds: Snowflake[],
+        roleId?: Snowflake
+    }>,
     lastRun: string,
     activity: Record<Snowflake, {
         general: {
