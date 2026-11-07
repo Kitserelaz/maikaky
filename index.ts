@@ -4,7 +4,9 @@ import { dataContent, saveData } from "./dataMsg.ts"
 import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, InteractionContextType, MessageFlags, DiscordAPIError, TextChannel, GuildMember } from "discord.js";
 import type { RESTPutAPIApplicationCommandsJSONBody, PollAnswerData, Message } from "discord.js"
 import "./activity.ts";
+import "./spam-filter.ts";
 import { serverIndexCommands } from "./serverIndexSetup.ts";
+import { leaderboardCommand } from "./leaderboard.ts";
 import { styleText } from "./formatting.ts";
 import JSZip from "jszip";
 
@@ -301,7 +303,7 @@ client.on(Events.MessageCreate, async message => {
     if (message.content !== "!test") return;
     console.log(message.member?.toJSON())
     console.log(message.author.toJSON())
-    console.log(message.author.toJSON().clan)
+    console.log((message.author.toJSON() as any).clan)
 })
 
 const createStyleChoice = (name: string, id: string) => styleText(name, id, false, false) + " - " + name
@@ -366,6 +368,7 @@ const styleChoices = [
 
 const commands: RESTPutAPIApplicationCommandsJSONBody = [
     ...serverIndexCommands,
+    leaderboardCommand,
     {
         type: ApplicationCommandType.ChatInput,
         name: "activity_chart",

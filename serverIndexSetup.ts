@@ -12,7 +12,7 @@ import {
 import type { RESTPutAPIApplicationCommandsJSONBody } from "discord.js";
 import client from "./client.ts";
 import { dataContent, saveData } from "./dataMsg.ts";
-import { getServerIndex } from "./serverIndex.ts";
+import { getServerIndex } from "./serverIndexGenerate.ts";
 
 export const serverIndexCommands: RESTPutAPIApplicationCommandsJSONBody = [
     {
