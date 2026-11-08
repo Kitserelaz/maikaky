@@ -8,7 +8,7 @@ import {
     PermissionFlagsBits,
 } from "discord.js";
 import type { Client, Guild, GuildMember, RESTPutAPIApplicationCommandsJSONBody } from "discord.js";
-import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getNextStatsRoleSlot, getStatsRoleSlot, getStatsRolePositions } from "./statsRoleSlotData.ts";
+import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getNextStatsRoleSlot, getStatsRoleSlot, getStatsRolePositions, parseStatsRoleColor } from "./statsRoleSlotData.ts";
 import type { StatsRoleNaming, StatsRoleSlots } from "./statsRoleSlotData.ts";
 import { setupStatsRoleOverwrites } from "./statsRoleSetup.ts";
 
@@ -49,7 +49,7 @@ export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: "config",
-            description: "Set claimed, unclaimed, and locked name formats; omitted formats stay unchanged",
+            description: "Set stats role names and unused colors; omitted settings stay unchanged",
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
@@ -73,6 +73,22 @@ export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
                     description: "Locked slot name: {status} for Locked, {slot} for the number",
                     min_length: 1,
                     max_length: 100,
+                    required: false,
+                },
+                {
+                    type: ApplicationCommandOptionType.String,
+                    name: "unclaimed_color",
+                    description: "Available slot color as six hex digits, for example #808080",
+                    min_length: 6,
+                    max_length: 7,
+                    required: false,
+                },
+                {
+                    type: ApplicationCommandOptionType.String,
+                    name: "locked_color",
+                    description: "Locked slot color as six hex digits, for example #303030",
+                    min_length: 6,
+                    max_length: 7,
                     required: false,
                 },
             ],
@@ -121,7 +137,16 @@ export const startStatsRoleSlots = (
                 if (!role) continue;
                 const locked = Number(slotId) !== nextSlot;
                 const name = formatUnclaimedStatsRoleName(locked ? naming.lockedNameFormat : naming.nameFormat, slotId, locked);
-                if (name !== role.name) await role.setName(name, locked ? "Stats role slot locked" : "Stats role slot available");
+                const color = locked ? naming.lockedColor : naming.unclaimedColor;
+                const colorChanged = color !== undefined && (role.colors.primaryColor !== color ||
+                    role.colors.secondaryColor !== null || role.colors.tertiaryColor !== null);
+                if (name !== role.name || colorChanged) {
+                    await role.edit({
+                        name,
+                        colors: color === undefined ? undefined : { primaryColor: color, secondaryColor: null, tertiaryColor: null },
+                        reason: locked ? "Stats role slot locked" : "Stats role slot available",
+                    });
+                }
             } catch {
                 console.error(`[Stats Roles] Could not update the name for slot ${slotId}; will retry.`);
             }
@@ -240,8 +265,9 @@ export const startStatsRoleSlots = (
         try {
             if (interaction.options.getSubcommand() === "config" &&
                 interaction.options.getString("claimed_format") === null && interaction.options.getString("unclaimed_format") === null &&
-                interaction.options.getString("locked_format") === null) {
-                await interaction.editReply("No name formats supplied; nothing changed.");
+                interaction.options.getString("locked_format") === null && interaction.options.getString("unclaimed_color") === null &&
+                interaction.options.getString("locked_color") === null) {
+                await interaction.editReply("No settings supplied; nothing changed.");
                 return;
             }
             if (interaction.options.getSubcommand() === "setup") {
@@ -261,6 +287,11 @@ export const startStatsRoleSlots = (
                     const claimedFormat = interaction.options.getString("claimed_format");
                     const unclaimedFormat = interaction.options.getString("unclaimed_format");
                     const lockedFormat = interaction.options.getString("locked_format");
+                    const unclaimedColorInput = interaction.options.getString("unclaimed_color");
+                    const lockedColorInput = interaction.options.getString("locked_color");
+                    const unclaimedColor = unclaimedColorInput === null ? undefined : parseStatsRoleColor(unclaimedColorInput);
+                    const lockedColor = lockedColorInput === null ? undefined : parseStatsRoleColor(lockedColorInput);
+                    if (unclaimedColor === null || lockedColor === null) return "Colors must be six hexadecimal digits, optionally prefixed with # (for example #808080).";
                     if (unclaimedFormat !== null) {
                         if (formatUnclaimedStatsRoleName(unclaimedFormat, "2147483647", false).length > 100) {
                             return "The unclaimed format must produce role names of at most 100 characters, including the status and slot number.";
@@ -275,19 +306,25 @@ export const startStatsRoleSlots = (
                     const previousFormat = naming.nameFormat;
                     const previousClaimedFormat = naming.claimedNameFormat;
                     const previousLockedFormat = naming.lockedNameFormat;
+                    const previousUnclaimedColor = naming.unclaimedColor;
+                    const previousLockedColor = naming.lockedColor;
                     if (unclaimedFormat !== null) naming.nameFormat = unclaimedFormat;
                     if (claimedFormat !== null) naming.claimedNameFormat = claimedFormat;
                     if (lockedFormat !== null) naming.lockedNameFormat = lockedFormat;
+                    if (unclaimedColor !== undefined) naming.unclaimedColor = unclaimedColor;
+                    if (lockedColor !== undefined) naming.lockedColor = lockedColor;
                     try {
                         await save();
                     } catch (error) {
                         naming.nameFormat = previousFormat;
                         naming.claimedNameFormat = previousClaimedFormat;
                         naming.lockedNameFormat = previousLockedFormat;
+                        naming.unclaimedColor = previousUnclaimedColor;
+                        naming.lockedColor = previousLockedColor;
                         throw error;
                     }
-                    if (unclaimedFormat !== null || lockedFormat !== null) await updateUnclaimedRoleNames(guild);
-                    return "Stats role name formats saved. Omitted formats were left unchanged.";
+                    if (unclaimedFormat !== null || lockedFormat !== null || unclaimedColor !== undefined || lockedColor !== undefined) await updateUnclaimedRoleNames(guild);
+                    return "Stats role appearance settings saved. Omitted settings were left unchanged.";
                 }
                 const slotId = String(interaction.options.getInteger("slot", true));
                 const role = await guild.roles.fetch(interaction.options.getRole("role", true).id);

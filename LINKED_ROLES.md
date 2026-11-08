@@ -276,10 +276,20 @@ Set claimed role names separately with
 claimed format. `{streak}` produces `8🔥21` or `8🔥` when the two streaks match;
 `{current}`, `{longest}`, and `{level}` insert their numeric values individually.
 The claimed format is saved as `statsRoleNaming.claimedNameFormat` in the same
-data message. All three command options are optional and can be provided together.
+data message. All format options are optional and can be provided together.
 Omitting an option leaves its saved format unchanged; omitting all makes no
 configuration changes. Names update after configuration and claims, and during
 startup and periodic reconciliation.
+
+Set available and locked role colors independently with
+`/stats-role config unclaimed_color:#808080 locked_color:#303030`. Each color is
+six hexadecimal digits, with an optional `#` prefix. Both options are optional;
+omitting one keeps its saved value. Colors are saved as
+`statsRoleNaming.unclaimedColor` and `statsRoleNaming.lockedColor` in the same
+data message. If a color has not been configured, that state's existing role
+color is preserved. Unused role name and color changes use a single edit and are
+skipped when already correct. Claimed roles still inherit their owner's highest
+role colors.
 
 Claimed stats roles also copy their owner's highest role colors, including
 gradient colors when present. Name and color changes are combined into one edit

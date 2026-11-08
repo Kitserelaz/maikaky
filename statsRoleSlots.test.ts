@@ -3,9 +3,18 @@ import { EventEmitter } from "node:events";
 import { test } from "bun:test";
 import { Collection, Events, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import type { Client } from "discord.js";
-import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getStatsRoleSlot, getStatsRolePositions } from "./statsRoleSlotData.ts";
+import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getStatsRoleSlot, getStatsRolePositions, parseStatsRoleColor } from "./statsRoleSlotData.ts";
 import type { StatsRoleNaming, StatsRoleSlots } from "./statsRoleSlotData.ts";
 import { startStatsRoleSlots } from "./statsRoleSlots.ts";
+
+test("stats role colors accept six-digit hex, including black, and reject invalid input", () => {
+    assert.equal(parseStatsRoleColor("#808080"), 0x808080);
+    assert.equal(parseStatsRoleColor("ABCDEF"), 0xabcdef);
+    assert.equal(parseStatsRoleColor("#000000"), 0);
+    assert.equal(parseStatsRoleColor("#FFF"), null);
+    assert.equal(parseStatsRoleColor("GG0000"), null);
+    assert.equal(parseStatsRoleColor("red"), null);
+});
 
 test("claimed role names display current streak, longest streak when different, and level", () => {
     assert.equal(formatClaimedStatsRoleName(8, 21, 23), "8🔥21 • Level 23");
@@ -66,11 +75,11 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
             name: `Unclaimed Role ${index + 1}`,
             colors: { primaryColor: 0, secondaryColor: null as number | null, tertiaryColor: null as number | null },
             setName: async (name: string) => { role.name = name; renames.push(name); },
-            edit: async (options: { name: string; colors: typeof role.colors }) => {
-                claimedEdits.push(options);
+            edit: async (options: { name: string; colors?: typeof role.colors }) => {
+                if (options.colors) claimedEdits.push({ name: options.name, colors: options.colors });
                 if (role.name !== options.name) renames.push(options.name);
                 role.name = options.name;
-                role.colors = { ...options.colors };
+                if (options.colors) role.colors = { ...options.colors };
             },
         };
         return [id, role] as const;
@@ -156,7 +165,12 @@ test("managed Linked Roles can be configured when permission and hierarchy check
     };
     const role = {
         id: "linked-role", name: "Unclaimed Role 1", managed: true, editable: false, position: 2,
+        colors: { primaryColor: 0x123456, secondaryColor: 0x654321 as number | null, tertiaryColor: null as number | null },
         tags: { guildConnections: true }, setName: async (name: string) => { role.name = name; },
+        edit: async (options: { name: string; colors?: typeof role.colors }) => {
+            role.name = options.name;
+            if (options.colors) role.colors = { ...options.colors };
+        },
     };
     const guild = {
         roles: { fetch: async () => role },
@@ -232,12 +246,43 @@ test("managed Linked Roles can be configured when permission and hierarchy check
     assert.equal(role.name, "Open 1");
     client.emit(Events.InteractionCreate, {
         ...interaction,
+        options: { getSubcommand: () => "config", getString: (name: string) => name === "unclaimed_color" ? "#000000" : null },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(saves, 7);
+    assert.equal(naming.unclaimedColor, 0);
+    assert.deepEqual(role.colors, { primaryColor: 0, secondaryColor: null, tertiaryColor: null });
+    client.emit(Events.InteractionCreate, {
+        ...interaction,
+        options: { getSubcommand: () => "config", getString: (name: string) => name === "locked_color" ? "#303030" : null },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(saves, 8);
+    assert.equal(naming.lockedColor, 0x303030);
+    assert.equal(naming.unclaimedColor, 0);
+    assert.equal(role.colors.primaryColor, 0);
+    client.emit(Events.InteractionCreate, {
+        ...interaction,
+        options: {
+            getSubcommand: () => "config",
+            getString: (name: string) => name === "unclaimed_color" ? "#000001" : name === "locked_color" ? "GG0000" : null,
+        },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(saves, 8);
+    assert.equal(naming.unclaimedColor, 0);
+    assert.equal(naming.lockedColor, 0x303030);
+    assert.match(replies.at(-1)!, /six hexadecimal digits/);
+    client.emit(Events.InteractionCreate, {
+        ...interaction,
         options: { getSubcommand: () => "config", getString: () => null },
     });
     await new Promise(resolve => setImmediate(resolve));
-    assert.equal(saves, 6);
+    assert.equal(saves, 8);
     assert.equal(naming.claimedNameFormat, "{streak} • L{level}");
     assert.equal(naming.nameFormat, "Open {slot}");
     assert.equal(naming.lockedNameFormat, "🔒 Slot {slot}");
+    assert.equal(naming.unclaimedColor, 0);
+    assert.equal(naming.lockedColor, 0x303030);
     assert.match(replies.at(-1)!, /nothing changed/);
 });

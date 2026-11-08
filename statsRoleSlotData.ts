@@ -1,5 +1,14 @@
 export type StatsRoleSlots = Record<string, { roleId: string; ownerId?: string }>;
-export type StatsRoleNaming = { nameFormat: string; claimedNameFormat?: string; lockedNameFormat?: string };
+export type StatsRoleNaming = {
+    nameFormat: string;
+    claimedNameFormat?: string;
+    lockedNameFormat?: string;
+    unclaimedColor?: number;
+    lockedColor?: number;
+};
+
+export const parseStatsRoleColor = (value: string) =>
+    /^#?[0-9a-f]{6}$/i.test(value) ? Number.parseInt(value.replace("#", ""), 16) : null;
 
 export const getNextStatsRoleSlot = (slots: StatsRoleSlots) => {
     let next = 1;
