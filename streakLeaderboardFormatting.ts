@@ -18,7 +18,7 @@ export const formatStreakLeaderboard = (
             const { current, longest, status: liveStatus } = calculateStreak(timestamps);
             const status = current === 0 ? "ended" : days[statusDay]?.timestamps.length ? "active"
                 : liveStatus === "warning" ? "warning" : "grace";
-            const currentLabel = `${formatDays(current)}${status === "active" ? " 🔥" : status === "warning" ? " ⚠️" : status === "grace" ? " ⏳" : ""}`;
+            const currentLabel = `${formatDays(current)}${status === "active" ? " 🔥" : status === "warning" ? " ❗" : status === "grace" ? " ⏳" : ""}`;
             return { id, name, current, longest, status, currentLabel };
         })
         .sort((a, b) => b.current - a.current || b.longest - a.longest || a.id.localeCompare(b.id));
@@ -39,7 +39,7 @@ export const formatStreakLeaderboard = (
             const active = entries.slice(index, end).filter(user => user.status === "active").length;
             const warning = entries.slice(index, end).filter(user => user.status === "warning").length;
             const grace = end - index - active - warning;
-            const indicators = [active > 0 ? `🔥 ${active}` : "", grace > 0 ? `⏳ ${grace}` : "", warning > 0 ? `⚠️ ${warning}` : ""]
+            const indicators = [active > 0 ? `🔥 ${active}` : "", grace > 0 ? `⏳ ${grace}` : "", warning > 0 ? `❗ ${warning}` : ""]
                 .filter(Boolean).join(" · ");
             sections.push({
                 type: ComponentType.TextDisplay,
