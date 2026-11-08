@@ -212,11 +212,32 @@ test("managed Linked Roles can be configured when permission and hierarchy check
     assert.equal(naming.nameFormat, "{status} #{slot}");
     client.emit(Events.InteractionCreate, {
         ...interaction,
+        options: { getSubcommand: () => "config", getString: (name: string) => name === "locked_format" ? "🔒 Slot {slot}" : null },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(saves, 5);
+    assert.equal(naming.lockedNameFormat, "🔒 Slot {slot}");
+    assert.equal(naming.claimedNameFormat, "{streak} • L{level}");
+    assert.equal(naming.nameFormat, "{status} #{slot}");
+    assert.equal(formatUnclaimedStatsRoleName(naming.lockedNameFormat, "2", true), "🔒 Slot 2");
+    client.emit(Events.InteractionCreate, {
+        ...interaction,
+        options: { getSubcommand: () => "config", getString: (name: string) => name === "unclaimed_format" ? "Open {slot}" : null },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(saves, 6);
+    assert.equal(naming.nameFormat, "Open {slot}");
+    assert.equal(naming.lockedNameFormat, "🔒 Slot {slot}");
+    assert.equal(naming.claimedNameFormat, "{streak} • L{level}");
+    assert.equal(role.name, "Open 1");
+    client.emit(Events.InteractionCreate, {
+        ...interaction,
         options: { getSubcommand: () => "config", getString: () => null },
     });
     await new Promise(resolve => setImmediate(resolve));
-    assert.equal(saves, 4);
+    assert.equal(saves, 6);
     assert.equal(naming.claimedNameFormat, "{streak} • L{level}");
-    assert.equal(naming.nameFormat, "{status} #{slot}");
+    assert.equal(naming.nameFormat, "Open {slot}");
+    assert.equal(naming.lockedNameFormat, "🔒 Slot {slot}");
     assert.match(replies.at(-1)!, /nothing changed/);
 });

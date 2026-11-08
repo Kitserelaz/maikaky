@@ -49,7 +49,7 @@ export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: "config",
-            description: "Set claimed and unclaimed role name formats; omitted formats stay unchanged",
+            description: "Set claimed, unclaimed, and locked name formats; omitted formats stay unchanged",
             options: [
                 {
                     type: ApplicationCommandOptionType.String,
@@ -62,7 +62,15 @@ export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
                 {
                     type: ApplicationCommandOptionType.String,
                     name: "unclaimed_format",
-                    description: "Unused name: {status} for Unclaimed/Locked, {slot} for the number",
+                    description: "Available slot name: {status} for Unclaimed, {slot} for the number",
+                    min_length: 1,
+                    max_length: 100,
+                    required: false,
+                },
+                {
+                    type: ApplicationCommandOptionType.String,
+                    name: "locked_format",
+                    description: "Locked slot name: {status} for Locked, {slot} for the number",
                     min_length: 1,
                     max_length: 100,
                     required: false,
@@ -112,7 +120,7 @@ export const startStatsRoleSlots = (
                 const role = await guild.roles.fetch(slot.roleId);
                 if (!role) continue;
                 const locked = Number(slotId) !== nextSlot;
-                const name = formatUnclaimedStatsRoleName(naming.nameFormat, slotId, locked);
+                const name = formatUnclaimedStatsRoleName(locked ? naming.lockedNameFormat : naming.nameFormat, slotId, locked);
                 if (name !== role.name) await role.setName(name, locked ? "Stats role slot locked" : "Stats role slot available");
             } catch {
                 console.error(`[Stats Roles] Could not update the name for slot ${slotId}; will retry.`);
@@ -231,7 +239,8 @@ export const startStatsRoleSlots = (
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         try {
             if (interaction.options.getSubcommand() === "config" &&
-                interaction.options.getString("claimed_format") === null && interaction.options.getString("unclaimed_format") === null) {
+                interaction.options.getString("claimed_format") === null && interaction.options.getString("unclaimed_format") === null &&
+                interaction.options.getString("locked_format") === null) {
                 await interaction.editReply("No name formats supplied; nothing changed.");
                 return;
             }
@@ -251,27 +260,33 @@ export const startStatsRoleSlots = (
                 if (interaction.options.getSubcommand() === "config") {
                     const claimedFormat = interaction.options.getString("claimed_format");
                     const unclaimedFormat = interaction.options.getString("unclaimed_format");
+                    const lockedFormat = interaction.options.getString("locked_format");
                     if (unclaimedFormat !== null) {
-                        if (!unclaimedFormat.includes("{status}")) return "Include {status} in the unclaimed format so roles can display Unclaimed or Locked. Use {slot} for the slot number.";
                         if (formatUnclaimedStatsRoleName(unclaimedFormat, "2147483647", false).length > 100) {
                             return "The unclaimed format must produce role names of at most 100 characters, including the status and slot number.";
                         }
+                    }
+                    if (lockedFormat !== null && formatUnclaimedStatsRoleName(lockedFormat, "2147483647", true).length > 100) {
+                        return "The locked format must produce role names of at most 100 characters, including the status and slot number.";
                     }
                     if (claimedFormat !== null && formatClaimedStatsRoleName(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER - 1, Number.MAX_SAFE_INTEGER, claimedFormat).length > 100) {
                         return "The claimed format must produce role names of at most 100 characters, including the streak and level values.";
                     }
                     const previousFormat = naming.nameFormat;
                     const previousClaimedFormat = naming.claimedNameFormat;
+                    const previousLockedFormat = naming.lockedNameFormat;
                     if (unclaimedFormat !== null) naming.nameFormat = unclaimedFormat;
                     if (claimedFormat !== null) naming.claimedNameFormat = claimedFormat;
+                    if (lockedFormat !== null) naming.lockedNameFormat = lockedFormat;
                     try {
                         await save();
                     } catch (error) {
                         naming.nameFormat = previousFormat;
                         naming.claimedNameFormat = previousClaimedFormat;
+                        naming.lockedNameFormat = previousLockedFormat;
                         throw error;
                     }
-                    if (unclaimedFormat !== null) await updateUnclaimedRoleNames(guild);
+                    if (unclaimedFormat !== null || lockedFormat !== null) await updateUnclaimedRoleNames(guild);
                     return "Stats role name formats saved. Omitted formats were left unchanged.";
                 }
                 const slotId = String(interaction.options.getInteger("slot", true));

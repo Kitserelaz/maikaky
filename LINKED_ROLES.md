@@ -262,20 +262,22 @@ to `2`. Later claims follow the same pattern. A member can own only one slot.
 Members outside the tracked server publish `0`.
 
 Set unused role names with `/stats-role config unclaimed_format:{status} Role {slot}`.
-`{status}` expands to `Unclaimed` for the next available slot, or `Locked` for
-other unclaimed slots. `{slot}` expands to the slot number. The default format
-is `{status} Role {slot}`; `{status}` is required, and resulting names must fit
-Discord's 100-character limit. For example, `{status} Stats #{slot}` produces
-`Unclaimed Stats #1` or `Locked Stats #2`. The format is saved as
-`statsRoleNaming.nameFormat` in the non-streak data message.
+This format applies only to available slots. Configure unavailable slots
+independently with `/stats-role config locked_format:🔒 Slot {slot}`.
+`{status}` expands to `Unclaimed` or `Locked` for the respective format;
+`{slot}` expands to the slot number. Both placeholders are optional. The default
+for each format is `{status} Role {slot}`, and resulting names must fit Discord's
+100-character limit. The available format is saved as `statsRoleNaming.nameFormat`
+and the locked format as `statsRoleNaming.lockedNameFormat` in the non-streak
+data message. Changing one does not change the other.
 
 Set claimed role names separately with
 `/stats-role config claimed_format:{streak} • Level {level}`. This is the default
 claimed format. `{streak}` produces `8🔥21` or `8🔥` when the two streaks match;
 `{current}`, `{longest}`, and `{level}` insert their numeric values individually.
 The claimed format is saved as `statsRoleNaming.claimedNameFormat` in the same
-data message. Both command options are optional and can be provided together.
-Omitting an option leaves its saved format unchanged; omitting both makes no
+data message. All three command options are optional and can be provided together.
+Omitting an option leaves its saved format unchanged; omitting all makes no
 configuration changes. Names update after configuration and claims, and during
 startup and periodic reconciliation.
 

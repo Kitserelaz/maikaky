@@ -1,5 +1,5 @@
 export type StatsRoleSlots = Record<string, { roleId: string; ownerId?: string }>;
-export type StatsRoleNaming = { nameFormat: string; claimedNameFormat?: string };
+export type StatsRoleNaming = { nameFormat: string; claimedNameFormat?: string; lockedNameFormat?: string };
 
 export const getNextStatsRoleSlot = (slots: StatsRoleSlots) => {
     let next = 1;
@@ -13,7 +13,7 @@ export const getStatsRoleSlot = (slots: StatsRoleSlots, userId: string) => {
     return getNextStatsRoleSlot(slots);
 };
 
-export const formatUnclaimedStatsRoleName = (format: string, slotId: string, locked: boolean) =>
+export const formatUnclaimedStatsRoleName = (format = "{status} Role {slot}", slotId: string, locked: boolean) =>
     format.replaceAll("{status}", locked ? "Locked" : "Unclaimed").replaceAll("{slot}", slotId);
 
 export const formatClaimedStatsRoleName = (
