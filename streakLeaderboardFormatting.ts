@@ -3,9 +3,12 @@ import type { APIContainerComponent, APITextDisplayComponent, InteractionEditRep
 import { calculateStreak } from "./maintenance/messageStreakCalculations.ts";
 import type { StreakHistory } from "./streaksData.ts";
 
+const formatDays = (days: number) => `${days} ${days === 1 ? "day" : "days"}`;
+
 export const formatStreakLeaderboard = (
     history: StreakHistory,
     requestedPage: number,
+    showPagination = true,
 ): InteractionEditReplyOptions => {
     const entries = Object.entries(history.users)
         .map(([id, { name, days }]) => {
@@ -20,23 +23,45 @@ export const formatStreakLeaderboard = (
     const start = page * 10;
     const sections = entries.slice(start, start + 10).map((entry, index): APITextDisplayComponent => ({
         type: ComponentType.TextDisplay,
-        content: `**${["🥇", "🥈", "🥉"][start + index] ?? `#${start + index + 1}.`} ${escapeMarkdown(entry.name)}**\nCurrent: ${entry.current} days · Longest: ${entry.longest} days`,
+        content: `**${["🥇", "🥈", "🥉"][start + index] ?? `#${start + index + 1}.`} ${escapeMarkdown(entry.name)}**\nCurrent: ${formatDays(entry.current)} · Longest: ${formatDays(entry.longest)}`,
     }));
+    if (!showPagination) {
+        let index = 10;
+        for (let group = 0; group < 5 && index < entries.length; group++) {
+            const entry = entries[index];
+            if (entry.current === 0) break;
+            let end = index + 1;
+            while (end < entries.length && entries[end].current === entry.current) end++;
+            sections.push({
+                type: ComponentType.TextDisplay,
+                content: end - index > 1
+                    ? `**#${index + 1}–#${end} · ${end - index} users tied · ${formatDays(entry.current)}**`
+                    : `**#${index + 1}. ${escapeMarkdown(entry.name)}** · ${formatDays(entry.current)}`,
+            });
+            index = end;
+        }
+    }
+    const heading = sections.length
+        ? "**Message streak leaderboard**"
+        : "No message streaks have been recorded yet.";
+    if (!showPagination) return {
+        content: [heading, ...sections.map(section => section.content)].join("\n\n"),
+        allowedMentions: { parse: [] },
+    };
+
     const container: APIContainerComponent = {
         type: ComponentType.Container,
         components: [{
             type: ComponentType.TextDisplay,
-            content: sections.length
-                ? "**Message streak leaderboard — Current streak**"
-                : "No message streaks have been recorded yet.",
+            content: heading,
         }],
     };
     container.components.push(...sections);
-    if (sections.length) container.components.push({
+    if (sections.length && showPagination) container.components.push({
         type: ComponentType.TextDisplay,
         content: `-# Page ${page + 1}/${pageCount}`,
     });
-    if (pageCount > 1) container.components.push({
+    if (pageCount > 1 && showPagination) container.components.push({
         type: ComponentType.ActionRow,
         components: [{
             type: ComponentType.Button,

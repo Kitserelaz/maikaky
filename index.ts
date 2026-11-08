@@ -9,6 +9,7 @@ import "./spam-filter.ts";
 import { serverIndexCommands } from "./serverIndexSetup.ts";
 import { leaderboardCommand } from "./leaderboard.ts";
 import { streakLeaderboardCommand } from "./streakLeaderboard.ts";
+import { streakAnnouncementChannelCommand } from "./streakAnnouncements.ts";
 import { linkedRoleRequirementCommand } from "./linkedRolesSetup.ts";
 import { styleText } from "./formatting.ts";
 import JSZip from "jszip";
@@ -373,6 +374,7 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
     ...serverIndexCommands,
     leaderboardCommand,
     streakLeaderboardCommand,
+    streakAnnouncementChannelCommand,
     linkedRoleRequirementCommand,
     {
         type: ApplicationCommandType.ChatInput,

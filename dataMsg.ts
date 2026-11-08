@@ -32,6 +32,7 @@ export const dataContent = JSON.parse(attachmentText) as {
     linkedRoles?: {
         requiredRoleId: Snowflake
     },
+    streakAnnouncementChannelId?: Snowflake,
     lastRun: string,
     activity: Record<Snowflake, {
         general: {
