@@ -10,15 +10,21 @@ import {
 import type { Client, Guild, GuildMember, RESTPutAPIApplicationCommandsJSONBody } from "discord.js";
 import { canClaimStatsRoleSlot, formatUnclaimedStatsRoleName, getNextStatsRoleSlot, getStatsRoleSlot } from "./statsRoleSlotData.ts";
 import type { StatsRoleNaming, StatsRoleSlots } from "./statsRoleSlotData.ts";
+import { setupStatsRoleOverwrites } from "./statsRoleSetup.ts";
 
 export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
     type: ApplicationCommandType.ChatInput,
     name: "stats-role",
-    description: "Configure stats role slots and unused role names",
+    description: "Configure stats role slots, unused names, and channel overwrites",
     default_member_permissions: PermissionFlagsBits.ManageGuild.toString(),
     integration_types: [ApplicationIntegrationType.GuildInstall],
     contexts: [InteractionContextType.Guild],
     options: [
+        {
+            type: ApplicationCommandOptionType.Subcommand,
+            name: "setup",
+            description: "Clear channel permission overwrites for all configured stats roles",
+        },
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: "slot",
@@ -189,6 +195,17 @@ export const startStatsRoleSlots = (
         }
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         try {
+            if (interaction.options.getSubcommand() === "setup") {
+                const roleIds = [...new Set(Object.values(slots).map(slot => slot.roleId))];
+                if (roleIds.length === 0) {
+                    await interaction.editReply("No stats roles are configured. Add them with /stats-role slot first.");
+                    return;
+                }
+                const guild = await client.guilds.fetch(guildId);
+                const { cleared, failed } = await setupStatsRoleOverwrites(guild, roleIds);
+                await interaction.editReply(`Stats role setup finished for ${roleIds.length} roles: ${cleared} permission overwrites cleared, ${failed} failed.${failed ? " Check the bot's channel permissions and logs, then rerun /stats-role setup." : ""}`);
+                return;
+            }
             const reply = await serialize(async () => {
                 const guild = await client.guilds.fetch(guildId);
                 if (interaction.options.getSubcommand() === "config") {
@@ -249,8 +266,8 @@ export const startStatsRoleSlots = (
             await interaction.editReply({ content: reply, allowedMentions: { parse: [] } });
             void reconcile().catch(() => console.error("[Stats Roles] Could not reconcile configured slots; will retry."));
         } catch {
-            console.error("[Stats Roles] Could not save stats role slot configuration.");
-            await interaction.editReply("Could not configure the stats role slot. Please try again.");
+            console.error("[Stats Roles] Could not complete the stats role command.");
+            await interaction.editReply("Could not complete the stats role request. Check the bot's permissions and logs.");
         }
     });
 

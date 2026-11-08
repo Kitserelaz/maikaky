@@ -241,6 +241,14 @@ Alt syncing does not wait for streak data or call Lurkr.
    matching number. The bot cannot read or configure these requirements, so the
    command records the mapping you supply.
 
+Run `/stats-role setup` with **Manage Server** to replace every configured stats
+role's channel overwrite with empty allow and deny permissions. This applies to
+categories and channels that were not synced to their category when setup began;
+synced children inherit their category's changes. Other roles' overwrites are
+not edited. The bot needs permission to manage overwrites in the target channels.
+The command reports successful and failed updates, logs each result, and keeps
+running if an individual overwrite fails. It does not shut down the bot.
+
 Connected members initially publish slot `1`. The first processed claim reserves
 that slot for the claimant, saves the ownership, and renames the role using their
 current streak, longest streak, and Lurkr level: `8🔥21 • Level 23`. When current
