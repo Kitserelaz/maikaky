@@ -1,3 +1,5 @@
 .env
 node_modules/
 .DS_Store
+linked-roles-tokens.json
+linked-roles-tokens.json.tmp

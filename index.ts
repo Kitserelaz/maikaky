@@ -8,6 +8,8 @@ import "./activity.ts";
 import "./spam-filter.ts";
 import { serverIndexCommands } from "./serverIndexSetup.ts";
 import { leaderboardCommand } from "./leaderboard.ts";
+import { streakLeaderboardCommand } from "./streakLeaderboard.ts";
+import { linkedRoleRequirementCommand } from "./linkedRolesSetup.ts";
 import { styleText } from "./formatting.ts";
 import JSZip from "jszip";
 
@@ -370,6 +372,8 @@ const styleChoices = [
 const commands: RESTPutAPIApplicationCommandsJSONBody = [
     ...serverIndexCommands,
     leaderboardCommand,
+    streakLeaderboardCommand,
+    linkedRoleRequirementCommand,
     {
         type: ApplicationCommandType.ChatInput,
         name: "activity_chart",

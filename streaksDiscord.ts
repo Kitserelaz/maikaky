@@ -25,19 +25,21 @@ const getWebhook = () => {
     return webhook;
 };
 
-const webhookRequest = async <T>(operation: () => Promise<T>): Promise<T> => {
+const webhookRequest = async <T>(description: string, operation: () => Promise<T>): Promise<T> => {
     try {
         return await operation();
     } catch (error) {
         const code = (error as { code?: unknown }).code;
-        throw new Error(`Streak storage webhook request failed${typeof code === "number" ? ` (Discord code ${code})` : ""}.`);
+        const failure = new Error(`Streak storage webhook request failed while ${description}${typeof code === "number" ? ` (Discord code ${code})` : ""}.`);
+        if (typeof code === "number") Object.assign(failure, { code });
+        throw failure;
     }
 };
 
 const verifiedWebhook = async () => {
     const client = getWebhook();
     if (!channelVerified) {
-        const info = await webhookRequest(() => client.rest.get(Routes.webhook(client.id, client.token), { auth: false })) as { channel_id: string };
+        const info = await webhookRequest("checking the data webhook channel", () => client.rest.get(Routes.webhook(client.id, client.token), { auth: false })) as { channel_id: string };
         if (info.channel_id !== channelId) throw new Error(`DATA_WEBHOOK must target channel ${channelId}.`);
         channelVerified = true;
     }
@@ -73,11 +75,11 @@ const readManifest = async (message: APIMessage): Promise<Manifest> => {
 
 export const loadDiscordStreakSnapshot = async () => {
     const client = await verifiedWebhook();
-    const root = await webhookRequest(() => client.fetchMessage(streaksDataMessageId));
+    const root = await webhookRequest(`loading manifest message ${streaksDataMessageId}`, () => client.fetchMessage(streaksDataMessageId));
     const manifest = await readManifest(root);
     const chunks: Buffer[] = [];
     for (const part of manifest.parts) {
-        const message = await webhookRequest(() => client.fetchMessage(part.messageId));
+        const message = await webhookRequest(`loading chunk message ${part.messageId}`, () => client.fetchMessage(part.messageId));
         chunks.push(await readAttachment(message, part.filename));
     }
     const bytes = Buffer.concat(chunks);
@@ -101,7 +103,7 @@ const publishSnapshot = async (snapshot: string, root?: APIMessage) => {
     for (let index = 0; index < count; index++) {
         const filename = count === 1 ? "streaks.json" : `streaks.part-${index + 1}.bin`;
         console.log(`[streaks] Uploading Discord chunk ${index + 1}/${count}.`);
-        const message = await webhookRequest(() => client.send({
+        const message = await webhookRequest(`uploading chunk ${index + 1}/${count}`, () => client.send({
             content: `Streak history chunk ${index + 1}/${count}`,
             allowedMentions: { parse: [] },
             files: [{ attachment: bytes.subarray(index * chunkSize, (index + 1) * chunkSize), name: filename }],
@@ -118,12 +120,17 @@ const publishSnapshot = async (snapshot: string, root?: APIMessage) => {
             { attachment: Buffer.from(JSON.stringify(manifest), "utf8"), name: "manifest.json" },
         ],
     };
-    const published = await webhookRequest(() => root ? client.editMessage(root.id, payload) : client.send(payload));
+    const published = await webhookRequest(root ? `updating manifest message ${root.id}` : "creating the manifest message", () =>
+        root ? client.editMessage(root.id, payload) : client.send(payload));
 
     for (const part of previous?.parts ?? []) {
         try {
-            await webhookRequest(() => client.deleteMessage(part.messageId));
+            await webhookRequest(`deleting superseded chunk message ${part.messageId}`, () => client.deleteMessage(part.messageId));
         } catch (error) {
+            if ((error as { code?: number }).code === 10008) {
+                console.log(`[streaks] Superseded chunk ${part.messageId} is already deleted.`);
+                continue;
+            }
             console.error(`[streaks] Snapshot published, but old chunk ${part.messageId} could not be removed:`, error);
         }
     }
@@ -134,6 +141,6 @@ export const createDiscordStreakSnapshot = async (snapshot: string) => publishSn
 
 export const saveDiscordStreakSnapshot = async (snapshot: string) => {
     const client = await verifiedWebhook();
-    const root = await webhookRequest(() => client.fetchMessage(streaksDataMessageId));
+    const root = await webhookRequest(`loading manifest message ${streaksDataMessageId} before saving`, () => client.fetchMessage(streaksDataMessageId));
     await publishSnapshot(snapshot, root);
 };

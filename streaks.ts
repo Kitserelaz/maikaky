@@ -8,6 +8,7 @@ import {
     saveStreakHistory,
     serializeStreakHistory,
     streaksGuildId,
+    type StreakHistory,
     type StreakStore,
 } from "./streaksData.ts";
 
@@ -23,6 +24,14 @@ let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let catchingUp = false;
 let catchUpRequested = false;
 let catchUpTimer: ReturnType<typeof setTimeout> | undefined;
+
+let resolveStreakHistory!: (history: StreakHistory) => void;
+const loadedStreakHistory = new Promise<StreakHistory>(resolve => {
+    resolveStreakHistory = resolve;
+});
+
+export const getStreakHistory = () => store?.history;
+export const waitForStreakHistory = () => loadedStreakHistory;
 
 const scheduleSave = () => {
     if (!ready || !dirty || writing || saveTimer !== undefined) return;
@@ -64,6 +73,7 @@ const catchUp = async () => {
     console.log(`[streaks] ${ready ? "Reconnecting" : "Initializing"}; starting catch-up.`);
     try {
         store ??= await loadStreakHistory();
+        resolveStreakHistory(store.history);
         do {
             catchUpRequested = false;
             await catchUpStreakHistory(client, store);

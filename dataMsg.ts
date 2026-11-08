@@ -29,6 +29,9 @@ export const dataContent = JSON.parse(attachmentText) as {
         messageIds: Snowflake[],
         roleId?: Snowflake
     }>,
+    linkedRoles?: {
+        requiredRoleId: Snowflake
+    },
     lastRun: string,
     activity: Record<Snowflake, {
         general: {
