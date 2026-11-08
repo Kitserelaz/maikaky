@@ -14,12 +14,12 @@ let channelVerified = false;
 
 const getWebhook = () => {
     if (!webhook) {
-        const url = process.env.DATA_WEBHOOK;
-        if (!url) throw new Error("DATA_WEBHOOK is required for streak storage.");
+        const url = process.env.dataWebhook;
+        if (!url) throw new Error("dataWebhook is required for streak storage.");
         try {
             webhook = new WebhookClient({ url });
         } catch {
-            throw new Error("DATA_WEBHOOK must be a valid Discord webhook URL.");
+            throw new Error("dataWebhook must be a valid Discord webhook URL.");
         }
     }
     return webhook;
@@ -38,7 +38,7 @@ const verifiedWebhook = async () => {
     const client = getWebhook();
     if (!channelVerified) {
         const info = await webhookRequest(() => client.rest.get(Routes.webhook(client.id, client.token), { auth: false })) as { channel_id: string };
-        if (info.channel_id !== channelId) throw new Error(`DATA_WEBHOOK must target channel ${channelId}.`);
+        if (info.channel_id !== channelId) throw new Error(`dataWebhook must target channel ${channelId}.`);
         channelVerified = true;
     }
     return client;
