@@ -14,8 +14,9 @@ export const formatStreakLeaderboard = (
         .map(([id, { name, days }]) => {
             const timestamps = new Set(Object.values(days).flatMap(day =>
                 day.timestamps.map(timestamp => Date.parse(timestamp))));
-            const { current, longest } = calculateStreak(timestamps);
-            return { id, name, current, longest };
+            const { current, longest, status } = calculateStreak(timestamps);
+            const currentLabel = `${formatDays(current)}${status === "active" ? " 🔥" : status === "grace" ? " ⏳" : ""}`;
+            return { id, name, current, longest, status, currentLabel };
         })
         .sort((a, b) => b.current - a.current || b.longest - a.longest || a.id.localeCompare(b.id));
     const pageCount = Math.max(1, Math.ceil(entries.length / 10));
@@ -23,7 +24,7 @@ export const formatStreakLeaderboard = (
     const start = page * 10;
     const sections = entries.slice(start, start + 10).map((entry, index): APITextDisplayComponent => ({
         type: ComponentType.TextDisplay,
-        content: `**${["🥇", "🥈", "🥉"][start + index] ?? `#${start + index + 1}.`} ${showPagination ? escapeMarkdown(entry.name) : `<@${entry.id}>`}**\nCurrent: ${formatDays(entry.current)} · Longest: ${formatDays(entry.longest)}`,
+        content: `**${["🥇", "🥈", "🥉"][start + index] ?? `#${start + index + 1}.`} ${showPagination ? escapeMarkdown(entry.name) : `<@${entry.id}>`}**\nCurrent: ${entry.currentLabel} · Longest: ${formatDays(entry.longest)}`,
     }));
     if (!showPagination) {
         let index = 10;
@@ -32,11 +33,15 @@ export const formatStreakLeaderboard = (
             if (entry.current === 0) break;
             let end = index + 1;
             while (end < entries.length && entries[end].current === entry.current) end++;
+            const active = entries.slice(index, end).filter(user => user.status === "active").length;
+            const grace = end - index - active;
+            const indicators = [active > 0 ? `🔥 ${active}` : "", grace > 0 ? `⏳ ${grace}` : ""]
+                .filter(Boolean).join(" · ");
             sections.push({
                 type: ComponentType.TextDisplay,
                 content: end - index > 1
-                    ? `**#${index + 1}–#${end} · ${end - index} users tied · ${formatDays(entry.current)}**`
-                    : `**#${index + 1}. <@${entry.id}>** · ${formatDays(entry.current)}`,
+                    ? `**#${index + 1}–#${end} · ${end - index} users tied · ${formatDays(entry.current)} · ${indicators}**`
+                    : `**#${index + 1}. <@${entry.id}>** · ${entry.currentLabel}`,
             });
             index = end;
         }

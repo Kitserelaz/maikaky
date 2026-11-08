@@ -22,7 +22,10 @@ export const calculateStreak = (timestamps: Set<number>) => {
     }
 
     const lastTimestamp = sorted.at(-1)!;
-    if (Date.now() >= streakDeadline(lastTimestamp)) current = 0;
+    const now = Date.now();
+    if (now >= streakDeadline(lastTimestamp)) current = 0;
+    const status = current === 0 ? "ended"
+        : now < streakDeadline(lastTimestamp) - streakTimeout ? "active" : "grace";
     const lastDay = new Date(lastTimestamp).toISOString().slice(0, 10);
-    return { current, longest, startTimestamp, lastDay };
+    return { current, longest, startTimestamp, lastDay, status };
 };
