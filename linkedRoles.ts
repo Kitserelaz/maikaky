@@ -88,7 +88,7 @@ export const startLinkedRoles = async (app: Express) => {
     const naming = dataContent.statsRoleNaming ??= { nameFormat: "{status} Role {slot}" };
     startStatsRoleSlots(client, streaksGuildId, slots, naming, saveData, alt.syncUsers, async userId => {
         const { metadata } = await getLinkedRolesMetadata(userId);
-        return formatClaimedStatsRoleName(Number(metadata.current_streak), Number(metadata.longest_streak), Number(metadata.level));
+        return formatClaimedStatsRoleName(Number(metadata.current_streak), Number(metadata.longest_streak), Number(metadata.level), naming.claimedNameFormat);
     });
     watchAltPermissionChanges(client, streaksGuildId, alt.syncUser, alt.syncUsers);
 };

@@ -243,11 +243,15 @@ Alt syncing does not wait for streak data or call Lurkr.
 
 Run `/stats-role setup` with **Manage Server** to replace every configured stats
 role's channel overwrite with empty allow and deny permissions. This applies to
-categories and channels that were not synced to their category when setup began;
+existing nonempty overwrites and missing overwrites; already-empty overwrites
+are skipped without an update request. The command reports the skipped count.
+All needed stats role changes for a channel are sent in one update, preserving
+the other role and member overwrites. Fully configured channels receive no update.
+It targets categories and channels that were not synced to their category when setup began;
 synced children inherit their category's changes. Other roles' overwrites are
 not edited. The bot needs permission to manage overwrites in the target channels.
-The command reports successful and failed updates, logs each result, and keeps
-running if an individual overwrite fails. It does not shut down the bot.
+The command reports successful and failed overwrites, logs each channel result,
+and keeps running if an individual channel update fails. It does not shut down the bot.
 
 Connected members initially publish slot `1`. The first processed claim reserves
 that slot for the claimant, saves the ownership, and renames the role using their
@@ -257,15 +261,30 @@ Its owner continues publishing `1`; unassigned members advance
 to `2`. Later claims follow the same pattern. A member can own only one slot.
 Members outside the tracked server publish `0`.
 
-Set unused role names with `/stats-role config name_format:{status} Role {slot}`.
+Set unused role names with `/stats-role config unclaimed_format:{status} Role {slot}`.
 `{status}` expands to `Unclaimed` for the next available slot, or `Locked` for
 other unclaimed slots. `{slot}` expands to the slot number. The default format
 is `{status} Role {slot}`; `{status}` is required, and resulting names must fit
 Discord's 100-character limit. For example, `{status} Stats #{slot}` produces
 `Unclaimed Stats #1` or `Locked Stats #2`. The format is saved as
-`statsRoleNaming.nameFormat` in the non-streak data message. Claimed roles use
-their owner's streak and level. Names update after configuration and claims, and during
+`statsRoleNaming.nameFormat` in the non-streak data message.
+
+Set claimed role names separately with
+`/stats-role config claimed_format:{streak} • Level {level}`. This is the default
+claimed format. `{streak}` produces `8🔥21` or `8🔥` when the two streaks match;
+`{current}`, `{longest}`, and `{level}` insert their numeric values individually.
+The claimed format is saved as `statsRoleNaming.claimedNameFormat` in the same
+data message. Both command options are optional and can be provided together.
+Omitting an option leaves its saved format unchanged; omitting both makes no
+configuration changes. Names update after configuration and claims, and during
 startup and periodic reconciliation.
+
+Unclaimed stats roles appear above claimed ones in ascending slot order. A newly
+claimed role moves below all other stats roles, preserving the order of previous
+claims. Releasing a slot returns it to ascending order among the unclaimed roles.
+Reordering uses a single batch request when changes are needed and keeps stats
+roles in their existing hierarchy positions so unrelated roles are not reordered.
+Position update failures are logged and retried during periodic reconciliation.
 
 Simultaneous claim events are processed through a single queue. If another
 member also receives an already claimed role, the bot attempts to remove it and

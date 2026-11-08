@@ -8,7 +8,7 @@ import {
     PermissionFlagsBits,
 } from "discord.js";
 import type { Client, Guild, GuildMember, RESTPutAPIApplicationCommandsJSONBody } from "discord.js";
-import { canClaimStatsRoleSlot, formatUnclaimedStatsRoleName, getNextStatsRoleSlot, getStatsRoleSlot } from "./statsRoleSlotData.ts";
+import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getNextStatsRoleSlot, getStatsRoleSlot, getStatsRolePositions } from "./statsRoleSlotData.ts";
 import type { StatsRoleNaming, StatsRoleSlots } from "./statsRoleSlotData.ts";
 import { setupStatsRoleOverwrites } from "./statsRoleSetup.ts";
 
@@ -49,15 +49,25 @@ export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
         {
             type: ApplicationCommandOptionType.Subcommand,
             name: "config",
-            description: "Set the name format for unclaimed and locked slots",
-            options: [{
-                type: ApplicationCommandOptionType.String,
-                name: "name_format",
-                description: "Role name template; use {status} for Unclaimed/Locked and {slot} for the number",
-                min_length: 1,
-                max_length: 100,
-                required: true,
-            }],
+            description: "Set claimed and unclaimed role name formats; omitted formats stay unchanged",
+            options: [
+                {
+                    type: ApplicationCommandOptionType.String,
+                    name: "claimed_format",
+                    description: "Claimed name: {streak}, {current}, {longest}, {level}",
+                    min_length: 1,
+                    max_length: 100,
+                    required: false,
+                },
+                {
+                    type: ApplicationCommandOptionType.String,
+                    name: "unclaimed_format",
+                    description: "Unused name: {status} for Unclaimed/Locked, {slot} for the number",
+                    min_length: 1,
+                    max_length: 100,
+                    required: false,
+                },
+            ],
         },
     ],
 };
@@ -72,10 +82,26 @@ export const startStatsRoleSlots = (
     getClaimedRoleName: (userId: string) => Promise<string>,
 ) => {
     let updates = Promise.resolve();
+    const recentClaims = new Set<string>();
     const serialize = <T>(operation: () => Promise<T>) => {
         const result = updates.then(operation);
         updates = result.then(() => {}, () => {});
         return result;
+    };
+
+    const updateRoleOrder = async (guild: Guild) => {
+        if (Object.keys(slots).length < 2) {
+            recentClaims.clear();
+            return;
+        }
+        try {
+            const roles = await guild.roles.fetch();
+            const positions = getStatsRolePositions(slots, [...roles.values()], [...recentClaims]);
+            if (positions.length > 0) await guild.roles.setPositions(positions);
+            recentClaims.clear();
+        } catch {
+            console.error("[Stats Roles] Could not update role order; will retry.");
+        }
     };
 
     const updateUnclaimedRoleNames = async (guild: Guild) => {
@@ -124,6 +150,8 @@ export const startStatsRoleSlots = (
                 delete slot.ownerId;
                 throw error;
             }
+            recentClaims.delete(slot.roleId);
+            recentClaims.add(slot.roleId);
             console.log(`[Stats Roles] Claimed slot ${slotId} for ${member.id}.`);
         }
         const role = await member.guild.roles.fetch(slot.roleId);
@@ -154,6 +182,7 @@ export const startStatsRoleSlots = (
             }
         }
         await updateUnclaimedRoleNames(guild);
+        await updateRoleOrder(guild);
         await syncUsers();
     });
 
@@ -182,6 +211,7 @@ export const startStatsRoleSlots = (
             }
             if (changed) {
                 await updateUnclaimedRoleNames(current.guild);
+                await updateRoleOrder(current.guild);
                 await syncUsers();
             }
         }).catch(() => console.error("[Stats Roles] Could not process role claims; will retry."));
@@ -195,6 +225,11 @@ export const startStatsRoleSlots = (
         }
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         try {
+            if (interaction.options.getSubcommand() === "config" &&
+                interaction.options.getString("claimed_format") === null && interaction.options.getString("unclaimed_format") === null) {
+                await interaction.editReply("No name formats supplied; nothing changed.");
+                return;
+            }
             if (interaction.options.getSubcommand() === "setup") {
                 const roleIds = [...new Set(Object.values(slots).map(slot => slot.roleId))];
                 if (roleIds.length === 0) {
@@ -202,28 +237,37 @@ export const startStatsRoleSlots = (
                     return;
                 }
                 const guild = await client.guilds.fetch(guildId);
-                const { cleared, failed } = await setupStatsRoleOverwrites(guild, roleIds);
-                await interaction.editReply(`Stats role setup finished for ${roleIds.length} roles: ${cleared} permission overwrites cleared, ${failed} failed.${failed ? " Check the bot's channel permissions and logs, then rerun /stats-role setup." : ""}`);
+                const { cleared, skipped, failed } = await setupStatsRoleOverwrites(guild, roleIds);
+                await interaction.editReply(`Stats role setup finished for ${roleIds.length} roles: ${cleared} permission overwrites cleared, ${skipped} already empty, ${failed} failed.${failed ? " Check the bot's channel permissions and logs, then rerun /stats-role setup." : ""}`);
                 return;
             }
             const reply = await serialize(async () => {
                 const guild = await client.guilds.fetch(guildId);
                 if (interaction.options.getSubcommand() === "config") {
-                    const format = interaction.options.getString("name_format", true);
-                    if (!format.includes("{status}")) return "Include {status} in the name format so roles can display Unclaimed or Locked. Use {slot} for the slot number.";
-                    if (formatUnclaimedStatsRoleName(format, "2147483647", false).length > 100) {
-                        return "The name format must produce role names of at most 100 characters, including the status and slot number.";
+                    const claimedFormat = interaction.options.getString("claimed_format");
+                    const unclaimedFormat = interaction.options.getString("unclaimed_format");
+                    if (unclaimedFormat !== null) {
+                        if (!unclaimedFormat.includes("{status}")) return "Include {status} in the unclaimed format so roles can display Unclaimed or Locked. Use {slot} for the slot number.";
+                        if (formatUnclaimedStatsRoleName(unclaimedFormat, "2147483647", false).length > 100) {
+                            return "The unclaimed format must produce role names of at most 100 characters, including the status and slot number.";
+                        }
+                    }
+                    if (claimedFormat !== null && formatClaimedStatsRoleName(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER - 1, Number.MAX_SAFE_INTEGER, claimedFormat).length > 100) {
+                        return "The claimed format must produce role names of at most 100 characters, including the streak and level values.";
                     }
                     const previousFormat = naming.nameFormat;
-                    naming.nameFormat = format;
+                    const previousClaimedFormat = naming.claimedNameFormat;
+                    if (unclaimedFormat !== null) naming.nameFormat = unclaimedFormat;
+                    if (claimedFormat !== null) naming.claimedNameFormat = claimedFormat;
                     try {
                         await save();
                     } catch (error) {
                         naming.nameFormat = previousFormat;
+                        naming.claimedNameFormat = previousClaimedFormat;
                         throw error;
                     }
-                    await updateUnclaimedRoleNames(guild);
-                    return `Unused stats role name format saved: ${format}`;
+                    if (unclaimedFormat !== null) await updateUnclaimedRoleNames(guild);
+                    return "Stats role name formats saved. Omitted formats were left unchanged.";
                 }
                 const slotId = String(interaction.options.getInteger("slot", true));
                 const role = await guild.roles.fetch(interaction.options.getRole("role", true).id);
@@ -261,6 +305,7 @@ export const startStatsRoleSlots = (
                     throw error;
                 }
                 await updateUnclaimedRoleNames(guild);
+                await updateRoleOrder(guild);
                 return `Stats role slot ${slotId} mapped to <@&${role.id}>. Set its Stats role slot ID requirement to exactly ${slotId}.`;
             });
             await interaction.editReply({ content: reply, allowedMentions: { parse: [] } });

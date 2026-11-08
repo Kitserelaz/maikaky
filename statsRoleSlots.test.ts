@@ -3,8 +3,8 @@ import { EventEmitter } from "node:events";
 import { test } from "bun:test";
 import { Collection, Events, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import type { Client } from "discord.js";
-import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getStatsRoleSlot } from "./statsRoleSlotData.ts";
-import type { StatsRoleSlots } from "./statsRoleSlotData.ts";
+import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getStatsRoleSlot, getStatsRolePositions } from "./statsRoleSlotData.ts";
+import type { StatsRoleNaming, StatsRoleSlots } from "./statsRoleSlotData.ts";
 import { startStatsRoleSlots } from "./statsRoleSlots.ts";
 
 test("claimed role names display current streak, longest streak when different, and level", () => {
@@ -12,6 +12,7 @@ test("claimed role names display current streak, longest streak when different, 
     assert.equal(formatClaimedStatsRoleName(8, 8, 23), "8🔥 • Level 23");
     assert.equal(formatClaimedStatsRoleName(0, 21, 0), "0🔥21 • Level 0");
     assert.equal(formatClaimedStatsRoleName(0, 0, 0), "0🔥 • Level 0");
+    assert.equal(formatClaimedStatsRoleName(8, 21, 23, "{current}/{longest} • L{level} ({streak})"), "8/21 • L23 (8🔥21)");
 });
 
 test("owners retain their slot while unassigned members advance", () => {
@@ -29,6 +30,27 @@ test("owners retain their slot while unassigned members advance", () => {
     assert.equal(getStatsRoleSlot(JSON.parse(JSON.stringify(slots)), "first"), 1);
 });
 
+test("new claims move below other stats roles and released slots return to numeric order", () => {
+    const slots: StatsRoleSlots = { "1": { roleId: "role1" }, "2": { roleId: "role2" }, "10": { roleId: "role10" } };
+    const roles = [{ id: "role1", position: 10 }, { id: "unrelated", position: 9 }, { id: "role2", position: 8 }, { id: "role10", position: 5 }];
+    const apply = (claims: string[]) => {
+        const positions = getStatsRolePositions(slots, roles, claims);
+        for (const update of positions) roles.find(role => role.id === update.role)!.position = update.position;
+        return roles.filter(role => role.id !== "unrelated").sort((a, b) => b.position - a.position).map(role => role.id);
+    };
+    assert.deepEqual(getStatsRolePositions(slots, roles, []), []);
+    slots["1"]!.ownerId = "first";
+    assert.deepEqual(apply(["role1"]), ["role2", "role10", "role1"]);
+    slots["2"]!.ownerId = "second";
+    assert.deepEqual(apply(["role2"]), ["role10", "role1", "role2"]);
+    assert.deepEqual(getStatsRolePositions(slots, roles, []), []);
+    delete slots["1"]!.ownerId;
+    assert.deepEqual(apply([]), ["role1", "role10", "role2"]);
+    delete slots["2"]!.ownerId;
+    assert.deepEqual(apply([]), ["role1", "role2", "role10"]);
+    assert.equal(roles.find(role => role.id === "unrelated")!.position, 9);
+});
+
 test("simultaneous role claims persist the first owner, rename the role, and remove competing claims", async () => {
     const client = new EventEmitter();
     const slots: StatsRoleSlots = { "1": { roleId: "role1" }, "2": { roleId: "role2" } };
@@ -36,8 +58,10 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
     const renames: string[] = [];
     const saves: string[] = [];
     const published: number[][] = [];
+    const positionUpdates: { role: string; position: number }[][] = [];
     const roles = new Map(["role1", "role2"].map((id, index) => {
         const role = {
+            id, position: 2 - index,
             name: `Unclaimed Role ${index + 1}`,
             setName: async (name: string) => { role.name = name; renames.push(name); },
         };
@@ -46,7 +70,13 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
     let initialized = false;
     const guild = {
         id: "guild",
-        roles: { fetch: async (id: string) => roles.get(id)! },
+        roles: {
+            fetch: async (id?: string) => id ? roles.get(id)! : new Collection(roles),
+            setPositions: async (positions: { role: string; position: number }[]) => {
+                positionUpdates.push(positions);
+                for (const update of positions) roles.get(update.role)!.position = update.position;
+            },
+        },
         members: { fetch: async (options?: { user: string }) => {
             if (options) return members.get(options.user)!;
             initialized = true;
@@ -80,6 +110,9 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
     assert.deepEqual(renames, ["Locked Role 2", "8🔥21 • Level 23", "Unclaimed Role 2"]);
     assert.equal(roles.get("role1")!.name, "8🔥21 • Level 23");
     assert.equal(roles.get("role2")!.name, "Unclaimed Role 2");
+    assert.equal(roles.get("role1")!.position, 1);
+    assert.equal(roles.get("role2")!.position, 2);
+    assert.equal(positionUpdates.length, 1);
     assert.deepEqual(removals, ["second"]);
     assert.deepEqual(published.at(-1), [1, 2]);
     client.emit(Events.GuildMemberUpdate, { roles: { cache: new Collection([["role1", {}]]) } }, members.get("second"));
@@ -94,6 +127,9 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
     assert.equal(JSON.parse(saves[1]!)["1"].ownerId, undefined);
     assert.equal(roles.get("role1")!.name, "Unclaimed Role 1");
     assert.equal(roles.get("role2")!.name, "Locked Role 2");
+    assert.equal(roles.get("role1")!.position, 2);
+    assert.equal(roles.get("role2")!.position, 1);
+    assert.equal(positionUpdates.length, 2);
     assert.deepEqual(published.at(-1), [1, 1]);
 });
 
@@ -116,7 +152,7 @@ test("managed Linked Roles can be configured when permission and hierarchy check
         members: { fetchMe: async () => botMember, fetch: async () => new Collection() },
     };
     Object.assign(client, { guilds: { fetch: async () => guild } });
-    const naming = { nameFormat: "{status} Role {slot}" };
+    const naming: StatsRoleNaming = { nameFormat: "{status} Role {slot}" };
     startStatsRoleSlots(client as unknown as Client, "guild", slots, naming,
         async () => { saves++; }, async () => {}, async () => formatClaimedStatsRoleName(0, 0, 0));
     const interaction = {
@@ -140,11 +176,36 @@ test("managed Linked Roles can be configured when permission and hierarchy check
     assert.match(replies.at(-1)!, /Manage Roles permission:\*\* Missing/);
     client.emit(Events.InteractionCreate, {
         ...interaction,
-        options: { getSubcommand: () => "config", getString: () => "{status} Stats #{slot}" },
+        options: { getSubcommand: () => "config", getString: (name: string) => name === "unclaimed_format" ? "{status} Stats #{slot}" : null },
     });
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(saves, 2);
     assert.equal(naming.nameFormat, "{status} Stats #{slot}");
     assert.equal(role.name, "Unclaimed Stats #1");
     assert.equal(formatUnclaimedStatsRoleName(naming.nameFormat, "2", true), "Locked Stats #2");
+    client.emit(Events.InteractionCreate, {
+        ...interaction,
+        options: { getSubcommand: () => "config", getString: (name: string) => name === "claimed_format" ? "{streak} • L{level}" : null },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(saves, 3);
+    assert.equal(naming.claimedNameFormat, "{streak} • L{level}");
+    assert.equal(naming.nameFormat, "{status} Stats #{slot}");
+    client.emit(Events.InteractionCreate, {
+        ...interaction,
+        options: { getSubcommand: () => "config", getString: (name: string) => name === "unclaimed_format" ? "{status} #{slot}" : null },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(saves, 4);
+    assert.equal(naming.claimedNameFormat, "{streak} • L{level}");
+    assert.equal(naming.nameFormat, "{status} #{slot}");
+    client.emit(Events.InteractionCreate, {
+        ...interaction,
+        options: { getSubcommand: () => "config", getString: () => null },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(saves, 4);
+    assert.equal(naming.claimedNameFormat, "{streak} • L{level}");
+    assert.equal(naming.nameFormat, "{status} #{slot}");
+    assert.match(replies.at(-1)!, /nothing changed/);
 });
