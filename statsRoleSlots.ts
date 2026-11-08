@@ -157,7 +157,12 @@ export const startStatsRoleSlots = (
         const role = await member.guild.roles.fetch(slot.roleId);
         if (role) {
             const name = await getClaimedRoleName(member.id);
-            if (role.name !== name) await role.setName(name, "Stats role streak and level updated");
+            const colors = member.roles.highest.colors;
+            const colorsChanged = role.colors.primaryColor !== colors.primaryColor ||
+                role.colors.secondaryColor !== colors.secondaryColor || role.colors.tertiaryColor !== colors.tertiaryColor;
+            if (role.name !== name || colorsChanged) {
+                await role.edit({ name, colors, reason: "Stats role streak, level, and color updated" });
+            }
         }
         return true;
     };

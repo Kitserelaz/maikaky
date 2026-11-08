@@ -279,6 +279,11 @@ Omitting an option leaves its saved format unchanged; omitting both makes no
 configuration changes. Names update after configuration and claims, and during
 startup and periodic reconciliation.
 
+Claimed stats roles also copy their owner's highest role colors, including
+gradient colors when present. Name and color changes are combined into one edit
+and skipped when both already match. Colors refresh on claim and during the
+five-minute reconciliation cycle.
+
 Unclaimed stats roles appear above claimed ones in ascending slot order. A newly
 claimed role moves below all other stats roles, preserving the order of previous
 claims. Releasing a slot returns it to ascending order among the unclaimed roles.

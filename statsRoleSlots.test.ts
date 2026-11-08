@@ -59,11 +59,19 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
     const saves: string[] = [];
     const published: number[][] = [];
     const positionUpdates: { role: string; position: number }[][] = [];
+    const claimedEdits: { name: string; colors: { primaryColor: number; secondaryColor: number | null; tertiaryColor: number | null } }[] = [];
     const roles = new Map(["role1", "role2"].map((id, index) => {
         const role = {
             id, position: 2 - index,
             name: `Unclaimed Role ${index + 1}`,
+            colors: { primaryColor: 0, secondaryColor: null as number | null, tertiaryColor: null as number | null },
             setName: async (name: string) => { role.name = name; renames.push(name); },
+            edit: async (options: { name: string; colors: typeof role.colors }) => {
+                claimedEdits.push(options);
+                if (role.name !== options.name) renames.push(options.name);
+                role.name = options.name;
+                role.colors = { ...options.colors };
+            },
         };
         return [id, role] as const;
     }));
@@ -89,6 +97,7 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
             id, guild, user: { username: `${id}-name` },
             roles: {
                 cache,
+                highest: { colors: { primaryColor: 0x123456, secondaryColor: 0x654321, tertiaryColor: null } },
                 remove: async (roleId: string) => { cache.delete(roleId); removals.push(id); },
             },
         };
@@ -110,6 +119,8 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
     assert.deepEqual(renames, ["Locked Role 2", "8🔥21 • Level 23", "Unclaimed Role 2"]);
     assert.equal(roles.get("role1")!.name, "8🔥21 • Level 23");
     assert.equal(roles.get("role2")!.name, "Unclaimed Role 2");
+    assert.equal(claimedEdits.length, 1);
+    assert.deepEqual(roles.get("role1")!.colors, members.get("first")!.roles.highest.colors);
     assert.equal(roles.get("role1")!.position, 1);
     assert.equal(roles.get("role2")!.position, 2);
     assert.equal(positionUpdates.length, 1);
