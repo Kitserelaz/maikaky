@@ -8,7 +8,7 @@ export const altLinkedRolesSchema = [
         type: ApplicationRoleConnectionMetadataType.IntegerEqual,
         key: "stats_role_slot_id",
         name: "Stats role slot ID",
-        description: "Assign role",
+        description: "Assign stats role",
     },
     {
         type: ApplicationRoleConnectionMetadataType.BooleanEqual,
