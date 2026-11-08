@@ -19,6 +19,9 @@ the regular refresh publishes the updated values.
    LURKR_API_KEY=your_lurkr_api_key
    LINKED_ROLES_ENCRYPTION_KEY=your_base64_encoded_32_byte_key
    LINKED_ROLES_TOKEN_MESSAGE_ID=your_encrypted_token_message_id
+   ALT_TOKEN=your_alt_bot_token
+   ALT_CLIENT_SECRET=your_alt_application_client_secret
+   ALT_LINKED_ROLES_TOKEN_MESSAGE_ID=your_alt_encrypted_token_message_id
    ```
 
    The application ID is taken from the logged-in bot. The existing `token`
@@ -71,6 +74,9 @@ host using the same Discord application and data messages.
    LURKR_API_KEY=existing_lurkr_api_key
    LINKED_ROLES_ENCRYPTION_KEY=copy_existing_key_unchanged
    LINKED_ROLES_TOKEN_MESSAGE_ID=copy_existing_message_id_unchanged
+   ALT_TOKEN=existing_alt_bot_token
+   ALT_CLIENT_SECRET=existing_alt_application_client_secret
+   ALT_LINKED_ROLES_TOKEN_MESSAGE_ID=copy_existing_alt_message_id_unchanged
    ```
 
    Replace the placeholders with the existing values; only the redirect URL
@@ -96,6 +102,8 @@ host using the same Discord application and data messages.
 
    - `/linked-roles`
    - `/oauth/discord/callback`
+   - `/alt/linked-roles`
+   - `/alt/oauth/discord/callback`
 
    The application currently uses port 3000 directly; setting a `PORT` variable
    does not change it. Keep that backend port private behind the HTTPS endpoint.
@@ -111,6 +119,12 @@ host using the same Discord application and data messages.
      `https://your-production-domain/linked-roles`.
    - Keep the Server Members, Presence, and Message Content privileged intents
      enabled, as requested by `client.ts`.
+
+   In the **alt application's** Developer Portal, register
+   `https://your-production-domain/alt/oauth/discord/callback` under
+   **OAuth2 → Redirects** and set **Linked Roles Verification URL** to
+   `https://your-production-domain/alt/linked-roles`. Install the alt in the
+   tracked server. The alt uses REST only; the main bot supplies member data.
 
    The bot needs access to the existing data channel and its message history,
    permission to send messages and attach files, and access to the channels it
@@ -168,6 +182,51 @@ does not have it. Membership is derived from Discord rather than stored.
 Changes to the setting apply within five minutes. Adding or removing the
 Common Role from a connected member also triggers a sync.
 
+## Alt application: permission requirements
+
+The main application keeps its four requirements. The alt application exposes:
+
+| Requirement | Metadata key | Guild permission |
+| --- | --- | --- |
+| Has Timeout Members permission | `has_timeout_members_permission` | Moderate Members |
+| Has Manage Roles permission | `has_manage_roles_permission` | Manage Roles |
+
+Set `ALT_TOKEN`, `ALT_CLIENT_SECRET`, and `ALT_LINKED_ROLES_TOKEN_MESSAGE_ID`.
+Both applications' configuration and encrypted token messages are required at
+startup. The alt token must belong to a different application, and its message
+ID must differ from `LINKED_ROLES_TOKEN_MESSAGE_ID`.
+
+The alt's domain and protocol come from `DISCORD_REDIRECT_URI`; there is no
+separate alt redirect setting. Its routes are `/alt/linked-roles` and
+`/alt/oauth/discord/callback`. With the current local redirect configuration,
+register `http://localhost:3000/alt/oauth/discord/callback` in the alt application's
+**OAuth2 → Redirects** and set its **Linked Roles Verification URL** to
+`http://localhost:3000/alt/linked-roles`. Use the corresponding HTTPS URLs for
+production. Install the alt application in the tracked server so admins can
+select it as a Linked Roles provider.
+
+For this installation, the alt application is `1569073773158858822` and its
+verified encrypted message is `1569079146800353320`; the message ID has been
+saved privately in `.env`. Its two metadata fields and local verification URL
+are already registered. Finish the account setup by adding the callback URL in
+the [alt application's OAuth2 settings](https://discord.com/developers/applications/1569073773158858822/oauth2)
+and [installing the alt in the tracked server](https://discord.com/oauth2/authorize?client_id=1569073773158858822&scope=bot&permissions=0&guild_id=1216816878937313442&disable_guild_select=true).
+
+Each member authorizes the alt separately from the main application. The two
+applications have separate OAuth state, cookies, refresh tokens, REST clients,
+and update queues. Existing main connections do not need to reconnect.
+
+The permission values use effective guild permissions: Administrator and the
+server owner satisfy both checks. They indicate permission possession rather
+than whether an action can be taken against a particular member or role.
+Members outside the tracked server receive `0` for both fields. Failed API
+requests retain previously published values until a successful sync.
+
+Alt syncs run at startup, after authorization, and every five minutes. Member
+role changes, joining/leaving, role permission edits/deletions, and ownership
+changes also queue updates through the main bot's existing Gateway connection.
+Alt syncing does not wait for streak data or call Lurkr.
+
 ## Token storage
 
 OAuth access tokens, refresh tokens, and expiry times are stored in a dedicated
@@ -183,6 +242,14 @@ the private `.env`. Keep a private backup of that key; losing it requires member
 to reconnect. Never put it in Discord. Missing attachments, failed downloads,
 and decryption errors stop loading rather than reset the token store.
 Run one bot process against this message to prevent competing writers.
+
+The alt uses its own main-bot-authored message selected by
+`ALT_LINKED_ROLES_TOKEN_MESSAGE_ID`, in the same data channel and encrypted with
+the same `LINKED_ROLES_ENCRYPTION_KEY`. Its attachment has the same filename and
+format but contains only alt OAuth tokens. Both messages are accessed through
+the main bot, so the alt does not need access to the data channel. Preserve both
+message IDs and the encryption key when deploying; do not recreate the stores
+on startup or overwrite the main message when configuring the alt.
 
 Revoked authorizations are removed from encrypted storage when detected. Members can
 disconnect the application in Discord's connection settings. A bot restart
