@@ -94,6 +94,7 @@ export const startLinkedRolesApplication = (app: Express, options: LinkedRolesAp
         const metadata = await getMetadata(userId);
         userRest.setToken(credentials.accessToken);
         try {
+            console.log(`[Linked Roles: ${name}] Publishing metadata for ${userId}: ${JSON.stringify(metadata.metadata)}`);
             await userRest.put(Routes.userApplicationRoleConnection(clientId), { body: metadata });
         } catch (error) {
             if (error instanceof DiscordAPIError && (error.status === 401 || error.status === 403)) {

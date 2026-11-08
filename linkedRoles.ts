@@ -2,13 +2,14 @@ import { Events, REST, Routes } from "discord.js";
 import type { APIUser, TextChannel } from "discord.js";
 import type { Express } from "express";
 import client from "./client.ts";
-import { dataContent, dataMsg } from "./dataMsg.ts";
+import { dataContent, dataMsg, saveData } from "./dataMsg.ts";
 import { streaksGuildId } from "./streaksData.ts";
 import { getLinkedRolesMetadata, registerLinkedRolesSchema } from "./linkedRolesMetadata.ts";
 import { loadLinkedRolesTokens, saveLinkedRolesTokens } from "./linkedRolesStorage.ts";
 import { startLinkedRolesApplication } from "./linkedRolesApplication.ts";
 import { altLinkedRolesSchema, getAltLinkedRolesMetadata, watchAltPermissionChanges } from "./linkedRolesPermissions.ts";
 import { describeLinkedRolesError } from "./linkedRolesErrors.ts";
+import { startStatsRoleSlots } from "./statsRoleSlots.ts";
 
 export const startLinkedRoles = async (app: Express) => {
     const clientSecret = process.env.DISCORD_CLIENT_SECRET;
@@ -64,6 +65,7 @@ export const startLinkedRoles = async (app: Express) => {
         saveTokens: tokens => saveLinkedRolesTokens(channel, mainMessageId, tokens),
         getMetadata: getLinkedRolesMetadata,
     });
+    const slots = dataContent.statsRoleSlots ??= {};
     const alt = startLinkedRolesApplication(app, {
         name: "Alt",
         clientId: altUser.id,
@@ -74,7 +76,7 @@ export const startLinkedRoles = async (app: Express) => {
         cookieName: "alt_linked_roles_state",
         tokens: altTokens,
         saveTokens: tokens => saveLinkedRolesTokens(channel, altMessageId, tokens),
-        getMetadata: userId => getAltLinkedRolesMetadata(client, streaksGuildId, userId),
+        getMetadata: userId => getAltLinkedRolesMetadata(client, streaksGuildId, userId, slots),
     });
     client.on(Events.GuildMemberUpdate, (previous, member) => {
         const roleId = dataContent.linkedRoles?.requiredRoleId;
@@ -82,5 +84,7 @@ export const startLinkedRoles = async (app: Express) => {
         if (previous.roles.cache.has(roleId) === member.roles.cache.has(roleId)) return;
         void main.syncUser(member.id).catch(() => console.error("[Linked Roles: Main] Could not persist Common Role updates."));
     });
+    const naming = dataContent.statsRoleNaming ??= { nameFormat: "{status} Role {slot}" };
+    startStatsRoleSlots(client, streaksGuildId, slots, naming, saveData, alt.syncUsers);
     watchAltPermissionChanges(client, streaksGuildId, alt.syncUser, alt.syncUsers);
 };

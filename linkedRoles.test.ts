@@ -131,12 +131,13 @@ test("permission metadata includes effective permissions, owners, departures, an
     const missing = new DiscordAPIError({ message: "Unknown Member", code: 10007 }, 10007, 404, "GET", "/member", {});
     const guild = { name: "Test server", members: { fetch: async () => { throw missing; } } };
     const client = { guilds: { fetch: async () => guild } } as unknown as Client;
-    assert.deepEqual((await getAltLinkedRolesMetadata(client, "guild", "departed")).metadata, {
+    assert.deepEqual((await getAltLinkedRolesMetadata(client, "guild", "departed", {})).metadata, {
         has_timeout_members_permission: "0", has_manage_roles_permission: "0",
+        stats_role_slot_id: "0",
     });
     const failure = new Error("Discord unavailable");
     guild.members.fetch = async () => { throw failure; };
-    await assert.rejects(getAltLinkedRolesMetadata(client, "guild", "member"), failure);
+    await assert.rejects(getAltLinkedRolesMetadata(client, "guild", "member", {}), failure);
 });
 
 test("permission events sync only relevant members and server changes", async () => {

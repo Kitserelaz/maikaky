@@ -191,6 +191,9 @@ The main application keeps its four requirements. The alt application exposes:
 | Has Timeout Members permission | `has_timeout_members_permission` | Moderate Members |
 | Has Manage Roles permission | `has_manage_roles_permission` | Manage Roles |
 
+The alt also exposes the integer-equality requirement **Stats role slot ID**
+(`stats_role_slot_id`).
+
 Set `ALT_TOKEN`, `ALT_CLIENT_SECRET`, and `ALT_LINKED_ROLES_TOKEN_MESSAGE_ID`.
 Both applications' configuration and encrypted token messages are required at
 startup. The alt token must belong to a different application, and its message
@@ -207,8 +210,8 @@ select it as a Linked Roles provider.
 
 For this installation, the alt application is `1569073773158858822` and its
 verified encrypted message is `1569079146800353320`; the message ID has been
-saved privately in `.env`. Its two metadata fields and local verification URL
-are already registered. Finish the account setup by adding the callback URL in
+saved privately in `.env`. The metadata fields are registered on startup and its
+local verification URL is configured. Finish the account setup by adding the callback URL in
 the [alt application's OAuth2 settings](https://discord.com/developers/applications/1569073773158858822/oauth2)
 and [installing the alt in the tracked server](https://discord.com/oauth2/authorize?client_id=1569073773158858822&scope=bot&permissions=0&guild_id=1216816878937313442&disable_guild_select=true).
 
@@ -226,6 +229,54 @@ Alt syncs run at startup, after authorization, and every five minutes. Member
 role changes, joining/leaving, role permission edits/deletions, and ownership
 changes also queue updates through the main bot's existing Gateway connection.
 Alt syncing does not wait for streak data or call Lurkr.
+
+## Stats role slots
+
+1. Restart the bot to register **Stats role slot ID** and the admin command.
+2. Create or select a Linked Role. In its requirements, choose the alt application
+   and enable **Stats role slot ID**, with its value set to `1`.
+3. Run `/stats-role slot slot:1 role:@YourRole` with **Manage Server** in the
+   tracked server. The main bot needs **Manage Roles** and a role above that role.
+4. Repeat for slots `2`, `3`, and so on, setting each role's requirement to its
+   matching number. The bot cannot read or configure these requirements, so the
+   command records the mapping you supply.
+
+Connected members initially publish slot `1`. The first processed claim reserves
+that slot for the claimant, saves the ownership, and renames the role to their
+Discord username. Its owner continues publishing `1`; unassigned members advance
+to `2`. Later claims follow the same pattern. A member can own only one slot.
+Members outside the tracked server publish `0`.
+
+Set unused role names with `/stats-role config name_format:{status} Role {slot}`.
+`{status}` expands to `Unclaimed` for the next available slot, or `Locked` for
+other unclaimed slots. `{slot}` expands to the slot number. The default format
+is `{status} Role {slot}`; `{status}` is required, and resulting names must fit
+Discord's 100-character limit. For example, `{status} Stats #{slot}` produces
+`Unclaimed Stats #1` or `Locked Stats #2`. The format is saved as
+`statsRoleNaming.nameFormat` in the non-streak data message. Claimed roles use
+their owner's username. Names update after configuration and claims, and during
+startup and periodic reconciliation.
+
+Simultaneous claim events are processed through a single queue. If another
+member also receives an already claimed role, the bot attempts to remove it and
+publishes that member's assigned or next available slot. There can be temporary
+overlap while these requests complete. Failed renames or removals are logged and
+retried every five minutes; Discord permissions or API restrictions must be
+resolved if removal continues failing.
+
+Mappings and ownership are stored in `statsRoleSlots` in the non-streak data
+message. When the recorded owner loses the role, the bot clears and saves the
+ownership, restores the configured Unclaimed/Locked name, and refreshes slot
+metadata. Removing a competing claimant's role does not release the slot.
+Reconciliation also releases slots whose owners are still in the server but no
+longer hold their roles, covering missed events. Reservations survive restarts,
+OAuth disconnection, and server departures; absence from the server alone does
+not release a slot. Claimed slots cannot be remapped to another role.
+The bot reconciles existing holders on startup and every five minutes. Claims
+missed while offline are resolved in the order members are observed during
+reconciliation, since Discord does not provide role acquisition timestamps.
+If the next number has no configured role yet, members keep that slot value
+until an admin sets up its role.
 
 ## Token storage
 

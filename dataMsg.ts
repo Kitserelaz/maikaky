@@ -1,5 +1,6 @@
 import client from "./client.js";
 import type { TextChannel, Snowflake } from "discord.js";
+import type { StatsRoleNaming, StatsRoleSlots } from "./statsRoleSlotData.ts";
 
 export const dataMsg = await (await client.channels.fetch("1327066650133925898") as TextChannel).messages.fetch("1327068250848235611");
 const attachmentText = await (await fetch([...dataMsg.attachments.values()][0].url)).text()
@@ -32,6 +33,8 @@ export const dataContent = JSON.parse(attachmentText) as {
     linkedRoles?: {
         requiredRoleId: Snowflake
     },
+    statsRoleSlots?: StatsRoleSlots,
+    statsRoleNaming?: StatsRoleNaming,
     streakAnnouncementChannelId?: Snowflake,
     lastRun: string,
     activity: Record<Snowflake, {

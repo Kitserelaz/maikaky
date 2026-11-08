@@ -1,7 +1,15 @@
 import { ApplicationRoleConnectionMetadataType, DiscordAPIError, Events, PermissionFlagsBits } from "discord.js";
 import type { Client, GuildMember } from "discord.js";
+import { getStatsRoleSlot } from "./statsRoleSlotData.ts";
+import type { StatsRoleSlots } from "./statsRoleSlotData.ts";
 
 export const altLinkedRolesSchema = [
+    {
+        type: ApplicationRoleConnectionMetadataType.IntegerEqual,
+        key: "stats_role_slot_id",
+        name: "Stats role slot ID",
+        description: "Assigned stats role slot ID",
+    },
     {
         type: ApplicationRoleConnectionMetadataType.BooleanEqual,
         key: "has_timeout_members_permission",
@@ -21,7 +29,7 @@ export const getPermissionMetadata = (member: Pick<GuildMember, "permissions"> |
     has_manage_roles_permission: member?.permissions.has(PermissionFlagsBits.ManageRoles) ? "1" : "0",
 });
 
-export const getAltLinkedRolesMetadata = async (client: Client, guildId: string, userId: string) => {
+export const getAltLinkedRolesMetadata = async (client: Client, guildId: string, userId: string, slots: StatsRoleSlots) => {
     const guild = await client.guilds.fetch(guildId);
     const member = await guild.members.fetch({ user: userId, force: true }).catch(error => {
         if (error instanceof DiscordAPIError && error.code === 10007) return null;
@@ -30,7 +38,10 @@ export const getAltLinkedRolesMetadata = async (client: Client, guildId: string,
     return {
         platform_name: guild.name.slice(0, 50),
         platform_username: member?.user.username ?? userId,
-        metadata: getPermissionMetadata(member),
+        metadata: {
+            ...getPermissionMetadata(member),
+            stats_role_slot_id: member ? String(getStatsRoleSlot(slots, userId)) : "0",
+        },
     };
 };
 
