@@ -63,6 +63,7 @@ export const startStatsRoleSlots = (
     naming: StatsRoleNaming,
     save: () => Promise<unknown>,
     syncUsers: () => Promise<void>,
+    getClaimedRoleName: (userId: string) => Promise<string>,
 ) => {
     let updates = Promise.resolve();
     const serialize = <T>(operation: () => Promise<T>) => {
@@ -120,8 +121,9 @@ export const startStatsRoleSlots = (
             console.log(`[Stats Roles] Claimed slot ${slotId} for ${member.id}.`);
         }
         const role = await member.guild.roles.fetch(slot.roleId);
-        if (role && role.name !== member.user.username) {
-            await role.setName(member.user.username, "Stats role slot claimed");
+        if (role) {
+            const name = await getClaimedRoleName(member.id);
+            if (role.name !== name) await role.setName(name, "Stats role streak and level updated");
         }
         return true;
     };

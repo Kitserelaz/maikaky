@@ -16,6 +16,9 @@ export const getStatsRoleSlot = (slots: StatsRoleSlots, userId: string) => {
 export const formatUnclaimedStatsRoleName = (format: string, slotId: string, locked: boolean) =>
     format.replaceAll("{status}", locked ? "Locked" : "Unclaimed").replaceAll("{slot}", slotId);
 
+export const formatClaimedStatsRoleName = (current: number, longest: number, level: number) =>
+    `${current}🔥${current === longest ? "" : longest} • Level ${level}`;
+
 export const canClaimStatsRoleSlot = (slots: StatsRoleSlots, slotId: string, userId: string) => {
     const slot = slots[slotId];
     return Boolean(slot && (!slot.ownerId || slot.ownerId === userId) && getStatsRoleSlot(slots, userId) === Number(slotId));

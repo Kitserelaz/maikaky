@@ -242,8 +242,10 @@ Alt syncing does not wait for streak data or call Lurkr.
    command records the mapping you supply.
 
 Connected members initially publish slot `1`. The first processed claim reserves
-that slot for the claimant, saves the ownership, and renames the role to their
-Discord username. Its owner continues publishing `1`; unassigned members advance
+that slot for the claimant, saves the ownership, and renames the role using their
+current streak, longest streak, and Lurkr level: `8🔥21 • Level 23`. When current
+and longest streaks match, the name shortens to `8🔥 • Level 23`.
+Its owner continues publishing `1`; unassigned members advance
 to `2`. Later claims follow the same pattern. A member can own only one slot.
 Members outside the tracked server publish `0`.
 
@@ -254,7 +256,7 @@ is `{status} Role {slot}`; `{status}` is required, and resulting names must fit
 Discord's 100-character limit. For example, `{status} Stats #{slot}` produces
 `Unclaimed Stats #1` or `Locked Stats #2`. The format is saved as
 `statsRoleNaming.nameFormat` in the non-streak data message. Claimed roles use
-their owner's username. Names update after configuration and claims, and during
+their owner's streak and level. Names update after configuration and claims, and during
 startup and periodic reconciliation.
 
 Simultaneous claim events are processed through a single queue. If another

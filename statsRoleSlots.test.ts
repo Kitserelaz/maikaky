@@ -3,9 +3,16 @@ import { EventEmitter } from "node:events";
 import { test } from "bun:test";
 import { Collection, Events, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import type { Client } from "discord.js";
-import { canClaimStatsRoleSlot, formatUnclaimedStatsRoleName, getStatsRoleSlot } from "./statsRoleSlotData.ts";
+import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getStatsRoleSlot } from "./statsRoleSlotData.ts";
 import type { StatsRoleSlots } from "./statsRoleSlotData.ts";
 import { startStatsRoleSlots } from "./statsRoleSlots.ts";
+
+test("claimed role names display current streak, longest streak when different, and level", () => {
+    assert.equal(formatClaimedStatsRoleName(8, 21, 23), "8🔥21 • Level 23");
+    assert.equal(formatClaimedStatsRoleName(8, 8, 23), "8🔥 • Level 23");
+    assert.equal(formatClaimedStatsRoleName(0, 21, 0), "0🔥21 • Level 0");
+    assert.equal(formatClaimedStatsRoleName(0, 0, 0), "0🔥 • Level 0");
+});
 
 test("owners retain their slot while unassigned members advance", () => {
     const slots: StatsRoleSlots = { "1": { roleId: "role1" }, "2": { roleId: "role2" } };
@@ -60,7 +67,8 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
     Object.assign(client, { guilds: { fetch: async () => guild } });
     startStatsRoleSlots(client as unknown as Client, "guild", slots, { nameFormat: "{status} Role {slot}" },
         async () => { saves.push(JSON.stringify(slots)); },
-        async () => { published.push([getStatsRoleSlot(slots, "first"), getStatsRoleSlot(slots, "second")]); });
+        async () => { published.push([getStatsRoleSlot(slots, "first"), getStatsRoleSlot(slots, "second")]); },
+        async () => formatClaimedStatsRoleName(8, 21, 23));
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(initialized, true);
     client.emit(Events.GuildMemberUpdate, { roles: { cache: new Collection() } }, members.get("first"));
@@ -69,8 +77,8 @@ test("simultaneous role claims persist the first owner, rename the role, and rem
     assert.equal(slots["1"]!.ownerId, "first");
     assert.equal(saves.length, 1);
     assert.equal(JSON.parse(saves[0]!)["1"].ownerId, "first");
-    assert.deepEqual(renames, ["Locked Role 2", "first-name", "Unclaimed Role 2"]);
-    assert.equal(roles.get("role1")!.name, "first-name");
+    assert.deepEqual(renames, ["Locked Role 2", "8🔥21 • Level 23", "Unclaimed Role 2"]);
+    assert.equal(roles.get("role1")!.name, "8🔥21 • Level 23");
     assert.equal(roles.get("role2")!.name, "Unclaimed Role 2");
     assert.deepEqual(removals, ["second"]);
     assert.deepEqual(published.at(-1), [1, 2]);
@@ -110,7 +118,7 @@ test("managed Linked Roles can be configured when permission and hierarchy check
     Object.assign(client, { guilds: { fetch: async () => guild } });
     const naming = { nameFormat: "{status} Role {slot}" };
     startStatsRoleSlots(client as unknown as Client, "guild", slots, naming,
-        async () => { saves++; }, async () => {});
+        async () => { saves++; }, async () => {}, async () => formatClaimedStatsRoleName(0, 0, 0));
     const interaction = {
         isChatInputCommand: () => true,
         commandName: "stats-role",
