@@ -1,4 +1,5 @@
 import client from "./client.ts";
+import "./streaks.ts";
 import "./webserver.ts";
 import { dataContent, saveData } from "./dataMsg.ts"
 import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, InteractionContextType, MessageFlags, DiscordAPIError, TextChannel, GuildMember } from "discord.js";
