@@ -35,14 +35,14 @@ export const streakAnnouncementChannelCommand: RESTPutAPIApplicationCommandsJSON
 let announcementChannelId = dataContent.streakAnnouncementChannelId;
 let timer: ReturnType<typeof setTimeout> | undefined;
 
-const postAnnouncement = async (channelId: string) => {
+const postAnnouncement = async (channelId: string, statusDay?: string) => {
     const history = getStreakHistory();
     if (!history) throw new Error("Streak history has not loaded yet.");
     const channel = await client.channels.fetch(channelId);
     if (!(channel instanceof TextChannel) || channel.guildId !== streaksGuildId) {
         throw new Error("The announcement channel must be a text channel in the tracked server.");
     }
-    const { content, allowedMentions } = formatStreakLeaderboard(history, 0, false);
+    const { content, allowedMentions } = formatStreakLeaderboard(history, 0, false, statusDay);
     await channel.send({ content: content!, allowedMentions });
     console.log(`[streaks] Posted the daily leaderboard in #${channel.name}.`);
 };
@@ -59,7 +59,8 @@ const scheduleAnnouncement = () => {
             if (!getStreakHistory()) {
                 console.warn("[streaks] Skipped the daily announcement: streak history has not loaded yet.");
             } else if (announcementChannelId) {
-                await postAnnouncement(announcementChannelId);
+                const completedDay = new Date(nextMidnight - 86_400_000).toISOString().slice(0, 10);
+                await postAnnouncement(announcementChannelId, completedDay);
             }
         } catch (error) {
             console.error("[streaks] Daily leaderboard announcement failed:", error);

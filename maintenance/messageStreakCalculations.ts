@@ -1,4 +1,4 @@
-export const streakTimeout = 36 * 60 * 60 * 1000;
+export const streakTimeout = 48 * 60 * 60 * 1000;
 
 const dayInMilliseconds = 86_400_000;
 
@@ -25,7 +25,8 @@ export const calculateStreak = (timestamps: Set<number>) => {
     const now = Date.now();
     if (now >= streakDeadline(lastTimestamp)) current = 0;
     const status = current === 0 ? "ended"
-        : now < streakDeadline(lastTimestamp) - streakTimeout ? "active" : "grace";
+        : now < streakDeadline(lastTimestamp) - streakTimeout ? "active"
+        : now >= streakDeadline(lastTimestamp) - dayInMilliseconds ? "warning" : "grace";
     const lastDay = new Date(lastTimestamp).toISOString().slice(0, 10);
     return { current, longest, startTimestamp, lastDay, status };
 };
