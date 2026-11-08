@@ -23,7 +23,7 @@ export const formatStreakLeaderboard = (
     const start = page * 10;
     const sections = entries.slice(start, start + 10).map((entry, index): APITextDisplayComponent => ({
         type: ComponentType.TextDisplay,
-        content: `**${["🥇", "🥈", "🥉"][start + index] ?? `#${start + index + 1}.`} ${escapeMarkdown(entry.name)}**\nCurrent: ${formatDays(entry.current)} · Longest: ${formatDays(entry.longest)}`,
+        content: `**${["🥇", "🥈", "🥉"][start + index] ?? `#${start + index + 1}.`} ${showPagination ? escapeMarkdown(entry.name) : `<@${entry.id}>`}**\nCurrent: ${formatDays(entry.current)} · Longest: ${formatDays(entry.longest)}`,
     }));
     if (!showPagination) {
         let index = 10;
@@ -36,7 +36,7 @@ export const formatStreakLeaderboard = (
                 type: ComponentType.TextDisplay,
                 content: end - index > 1
                     ? `**#${index + 1}–#${end} · ${end - index} users tied · ${formatDays(entry.current)}**`
-                    : `**#${index + 1}. ${escapeMarkdown(entry.name)}** · ${formatDays(entry.current)}`,
+                    : `**#${index + 1}. <@${entry.id}>** · ${formatDays(entry.current)}`,
             });
             index = end;
         }
