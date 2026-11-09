@@ -1,0 +1,285 @@
+House is below.
+ :air::oak_log::oak_log_rot::oak_log_rot::oak_log_rot::oak_log:
+ :air::oak_log::oak_plank::oak_plank::oak_plank::oak_log:
+ :air::oak_log::oak_plank::oak_door_top_right::oak_plank::oak_log:
+ :air::oak_log::oak_plank::oak_door_bottom_right::oak_plank::oak_log:
+ :grass_block::grass_block::grass_block::grass_block::grass_block::grass_block::grass_block:
+
+## STAFF RANKS
+
+<@&1216817042154459256> — [𝟐𝟗] ✺ 🜲 𝗧𝗵𝘆 𝗧𝗶𝘁𝗮𝗻 🜲 ✺ — Owner
+<@&1216817050157056093> — [𝟐𝟖] ✹ 🜲 𝗧𝗵𝘆-𝗖𝗼-𝗧𝗶𝘁𝗮𝗻 🜲 ✹ — Co-owner
+<@&1334606000564604990> — [𝟏𝟔] ✥ 𝗦𝘂𝗽𝗿𝗲𝗺𝗲 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ✥ — Head of staff
+<@&1334604382112845854> — [𝟏𝟓] ✤ 𝗢𝘃𝗲𝗿𝘀𝗲𝗲𝗿 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ✤ — Lead admin
+<@&1320364901058744332> — [𝟏𝟒] ✣ 𝗨𝗹𝘁𝗿𝗮 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ✣ — Senior admin
+<@&1216817052002811976> — [𝟏𝟑] ✢ 𝗦𝘂𝗽𝗲𝗿 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ✢ — Regular admin
+<@&1216817053638594612> — [𝟏𝟐] ⁂ 𝗛𝗲𝗮𝗱 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ⁂ — Junior admin
+<@&1216817055408586914> — [𝟏𝟏] ⁑ 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ⁑ — Regular moderator
+<@&1216817056574472282> — [𝟏𝟎] ⁎ 𝗠𝗶𝗻𝗶 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ⁎ — Junior moderator
+
+## MAIN ROLES
+
+<@&1216817045211971645> — Quarantine
+<@&1216817067009773669> — [𝟖] ✪ 𝗠𝗼𝗱𝗲𝗿𝗮𝘁𝗶𝗼𝗻 𝗯𝗼𝘁𝘀 ✪
+<@&1275858780126711818> — [𝟑] ✡ 𝗦𝘂𝘀𝗽𝗶𝗰𝗶𝗼𝘂𝘀 𝗔𝗰𝗰𝗼𝘂𝗻𝘁 ✡ — Prisoner but has no access but Prison. Used for potential spies, or suspicious accounts.
+<@&1216817059187392512> — [𝟐] ☆ 𝗣𝗿𝗶𝘀𝗼𝗻𝗲𝗿𝘀 ☆ — Punished citizens for breaking the rules and reaching a specific warn for not obeying the rules.
+<@&1216817060303208548> — [𝟏] ★ 𝗔𝗻 𝗔𝗿𝗿𝗶𝘃𝗮𝗹 ★ — New member that hasn't been verified yet.
+<@&1217515576432263219> — [𝟔] ♢ 𝗣𝗿𝗲𝗺𝗶𝘂𝗺 𝗖𝗶𝘁𝗶𝘇𝗲𝗻 ♢ — Server boosters
+<@&1271804283855175751> — [𝟓] ✧ 𝗖𝗼𝗹𝗹𝗮𝗯𝗼𝗿𝗮𝘁𝗼𝗿𝘀 ✧ — ???
+<@&1216817084277850142> — [𝟒] ✦ 𝗧𝗵𝗲 𝗖𝗶𝘁𝗶𝘇𝗲𝗻𝘀 ✦ — Members of the server
+<@&1216817085347266603> — [𝟕] ✩ 𝗨𝘁𝗶𝗹𝗹𝗶𝘁𝘆 𝗕𝗼𝘁 ✩
+<@&1216817087041769695> — [𝟕] ✩ 𝗙𝘂𝗻 𝗕𝗼𝘁𝘀 ✩
+<@&1216817088069369938> — [𝟕] ✩ 𝗕𝗼𝘁𝘀 ✩
+
+## LEVEL ROLES
+
+<@&1275815964856029227> — ✰ Level 100: Secret level : Unemployed as Layal
+<@&1275815907326951465> — ✰ Level 90: Affluent Axw
+<@&1275815822589427814> — ✰ Level 80: Eternal Exponent
+<@&1275815669685817507> — ✰ Level 70: Memorialist
+<@&1275815618863693854> — ✯ Level 60: Diamond Ace
+<@&1275815555466788864> — ✬ Level 50: Gigachad
+<@&1275815504497348649> — ✯ Level 45: Chad
+<@&1275815443692785796> — ✭ Level 40: Chadlite
+<@&1275815397198921760> — ✬ Level 35: Boss
+<@&1275815343629144156> — ✫ Level 30: Gold Connoisseur
+<@&1316457739387666473> — ✪ Level 29: Iron Aficionado - Ever
+<@&1316457738263466075> — ✪ Level 28: Iron Aficionado - Never
+<@&1316457737797767260> — ✪ Level 27: Iron Aficionado - Abused
+<@&1316457737093124147> — ✪ Level 26: Iron Aficionado - Vanished
+<@&1275815192642715709> — ✪ Level 25: Iron Aficionado
+<@&1316457736493469737> — ✩ Level 24: Stone Maven - Blackstone
+<@&1316457735583301683> — ✩ Level 23: Stone Maven - Basalt
+<@&1316457734794776589> — ✩ Level 22: Stone Maven - Deepslate
+<@&1316457734253838377> — ✩ Level 21: Stone Maven - Slate
+<@&1275815045489492009> — ✩ Level 20: Stone Maven
+<@&1316457731158315008> — ✧ Level 19: Wooden Savant - Barking on the street
+<@&1316457733704384573> — ✧ Level 18: Wooden Savant - Heartwood
+<@&1316457733041688606> — ✧ Level 17: Wooden Savant - Lumber
+<@&1316457731967680532> — ✧ Level 16: Wooden Savant - Timber
+<@&1275814692186488925> — ✧ Level 15: Wooden Savant
+<@&1316457729044250704> — ✦ Level 14: Master - Network
+<@&1316457726091464734> — ✦ Level 13: Master - Web
+<@&1316457715878330379> — ✦ Level 12: Master - Connection
+<@&1316457709700382812> — ✦ Level 11: Master - Node
+<@&1275814472925184130> — ✦ Level 10: Master — Gives you ability to support MGTVNews on any server
+<@&1316456580916576327> — ☆ Level 9: Pro - Square
+<@&1316456555222138920> — ☆ Level 8: Pro - Squiggle
+<@&1316456484011507843> — ☆ Level 7: Pro - Line
+<@&1316456443179696190> — ☆ Level 6: Pro - Dot
+<@&1275814191759884391> — ☆ Level 5: Pro
+<@&1316456398824931328> — ★ Level 4: Noob - Experienced
+<@&1316456354105397288> — ★ Level 3: Noob - Accustomed
+<@&1275814051892691025> — ★ Level 2: Noob
+<@&1275813685503328307> — ★ Level 1: Crook
+
+## PING ROLES
+
+<@&1216817089151631371> — ┆ New Upload
+<@&1216817090418315395> — ┆ Announcements
+<@&1216817091319959773> — ┆ Dead chat
+<@&1216817091974266881> — ┆ Polls
+<@&1216817093631017083> — ┆ Giveaways
+<@&1216817099570417724> — ┆ Facts of the day
+<@&1216817095740887080> — ┆ Viewers War — Archived
+<@&1216817137461628998> — ┆ Updates
+<@&1216817138573250570> — ┆ Movies and Stories
+<@&1216817143799218286> — ┆ Activities
+<@&1216817149335703572> — ┆ MGTVNEWS Notifications
+<@&1216817155723497642> — ┆ Event Notifications — Archived
+<@&1225277158134517810> — ┆ Spam Pinged (anyone can ping this)
+<@&1216817109133426768> — ┆ Partnership — Archived
+<@&1234267903562481705> — ┆ Member Engagement Role
+<@&1216817134840315994> — ┆ Bird with balls production ping
+<@&1408472634219565186> — ┆ Viewers War News
+
+## Interests
+
+<@&1216817100480319628> — ⛏┆ Minecraft
+<@&1216817101256523958> — 🔳┆ Roblox
+<@&1216817102351106151> — 🚪┆ Fortnite
+<@&1216817104246804634> — ♟️┆ Chess — Archived
+<@&1216817105698029578> — 🐈┆ Cat Lover
+<@&1216817106746605638> — 🐕┆ Dog Lover
+<@&1216817110257373275> — 📟┆ Former Operator — Archived
+<@&1224928136945209355> — 🎭┆ Roleplayer — Archived
+<@&1232948143310639145> — ⭐┆ Brawl stars
+<@&1296322210394542170> — 💻┆ Technology
+<@&1327113534219358351> — 🎨┆ Drawing
+<@&1332633605591142400> — 🦉 ┆ Duolingo
+<@&1561414779153817821> — 🪖┆ OpenFront.io
+
+## Communities
+
+<@&1223401127278809139> — B*droumer — Archived
+<@&1223401207251603517> — R*iding Community
+<@&1223401262255575051> — MillenniumXYZ Community [THIS COMMUNITY]
+<@&1223401323899256973> — Geotuber
+<@&1216817107585597582> — Mapping community
+<@&1233803620865150996> — Fanmade-Archives community
+<@&1233803797348749454> — UTubeTrollPolice Community
+<@&1233804047010496512> — G*animate Community
+<@&1268134249769209856> — Rayez-Unecessary Albanian community
+<@&1338525813212975164> — BonziWORLD community
+<@&1224460430223872040> — Non-aligned
+<@&1332777590704046141> — SSY Subcommunity
+<@&1332777823055646751> — Millennish Subcommunity
+<@&1332825321644494969> — RGF Subcommunity
+
+## Genders
+
+<@&1216817096571224126> — 🚻┆Male
+<@&1216817098119053605> — 🚻┆Female
+
+## Religion
+
+<@&1216817112505651340> — ┆ Christian
+<@&1216817113528795266> — ┆ Muslim
+<@&1216817115579814028> — ┆ Atheist
+<@&1216817114623774800> — ┆ Jewish
+<@&1216817116708208780> — ┆ Hindu
+<@&1216817117949595789> — ┆ Buddhist
+<@&1216817118759354420> — ┆ Sexist — Archived
+<@&1216817120181223566> — ┆ Christian ping
+<@&1216817121237925978> — ┆ Muslim ping
+<@&1216817122080985300> — ┆ Jewish ping
+<@&1216817124308156526> — ┆ Hindu ping
+<@&1216817125394481153> — ┆ Buddhist ping
+<@&1216817128548732978> — ┆ Other religious
+
+## Ethnicity
+
+<@&1216817131035820233> — 𝗣𝗼𝗹𝗶𝘀𝗵
+<@&1216817132009029734> — 𝗦𝘄𝗲𝗱𝗶𝘀𝗵
+<@&1313449660056076348> — Norwegian
+<@&1313449777450586172> — Pan-arabic
+<@&1313449923814887464> — Persian
+<@&1313449992190431242> — Czech
+<@&1313450043415466035> — Slovak
+<@&1313450160054865940> — Lithuanian
+<@&1313450223174942760> — Russian
+<@&1313450761656733740> — Ukrainian
+<@&1313450851041542267> — Finland
+<@&1313450936542171136> — Serbian
+<@&1313451145741467699> — Danish
+<@&1313451253409386547> — British English
+<@&1313451359814680597> — British Scottish
+<@&1313451471119061083> — British Welsh
+<@&1313451551930454016> — British Irish [Northern Ireland]
+<@&1313451881808269332> — Ireland
+<@&1313451971335819264> — British Isle of man
+<@&1313453664530337803> — German
+<@&1313453855098404945> — French
+<@&1313453966142734366> — Spanish
+<@&1313454039035543603> — Portuguese
+<@&1313454089321058314> — Slovenian
+<@&1313454235299348511> — Italian
+<@&1313454335522246676> — Dutch
+<@&1313454636413222912> — Croatian
+<@&1313454719330422784> — Bosniak
+<@&1313454816353189969> — Hungarian
+<@&1561413852275548190> — Chinese
+<@&1313454916077092916> — Romanian
+<@&1313455002353795093> — Albanian
+<@&1313455078644125737> — Greek
+<@&1313455186127229001> — Bulgarian
+<@&1313455274853662720> — Turkish
+<@&1313455348975271969> — Montengrin
+<@&1313455845266161675> — Estonian
+<@&1313456259571126352> — Latvian
+<@&1313456390089609228> — Icelandic
+<@&1313458814367961098> — Israeli/Hebrew
+<@&1313458970056196096> — Georgian
+<@&1313459350014001182> — Armenian
+
+## Events and Specials
+
+<@&1216817062631047290> — Happy Birthday
+<@&1298212873855832124> — October 2024 Tourney
+<@&1333855298766770329> — Cute Lesbian couple 👭
+<@&1402750803550142584> — DMCA Takeup
+<@&1562585458389557369> — THE DON
+<@&1565940566095560815> — MGTV24 Crash Ping
+
+## Statics
+
+<@&1216817162451288164> — Ticket 3
+<@&1216817163592142949> — Ticket 2
+<@&1216817164749635644> — Ticket 1
+<@&1339492338220929074> — Corpse/Dead account
+<@&1398796382411816971> — Alt account
+
+## Linked Roles
+
+<@&1569098713278980267> — Unclaimed 4 - Click to Claim
+<@&1569098743494746302> — Locked 5 - Not Available
+<@&1569085259499176056> — 8🔥21 • Level 24
+<@&1569085329846042664> — 66🔥 • Level 52
+<@&1569094733244928000> — 30🔥 • Level 30
+
+## Bot Roles
+
+<@&1216816981555155114> — Xenon
+<@&1217421745426792491> — Wick
+<@&1216817052644413572> — [𝟐𝟕] 𝗠𝗼𝗱𝗲𝗿𝗮𝘁𝗶𝗼𝗻 𝗯𝗼𝘁𝘀 (perms role)
+<@&1272176143130169430> — Arcane
+<@&1316433044969881723> — Lurkr
+<@&1217053935089487989> — Maki.gg
+<@&1217421894798807062> — Empireballs
+<@&1217422618882347091> — Yggdrasil
+<@&1217422556659712133> — esmBot
+<@&1217422655439896589> — UnbelievaBoat
+<@&1220352980214218764> — SnipeBot
+<@&1223170498847047733> — Asiadex
+<@&1224766862265417801> — EuropeDex
+<@&1231063469520978004> — NQN
+<@&1271798091963564126> — ServerStats
+<@&1272167551199350798> — Dank Memer
+<@&1272168888989253716> — NotSoBot
+<@&1272168944790147095> — Tupperbox
+<@&1272169056929321013> — Countryvia
+<@&1273959599317454899> — Pingcord
+<@&1273959837784604717> — ProBot ✨
+<@&1281960125099282557> — carl-bot
+<@&1294615043823894582> — Dad Bot
+<@&1226586935238328454> — BibleBot
+<@&1327069514357149788> — Maikaky
+<@&1334852761904353293> — Dyno
+<@&1340039355137261622> — Make it a Quote
+<@&1398074607361196173> — EarferanaSync Legacy
+<@&1400977320722038816> — MijoSync
+<@&1403562014948851714> — Anti Ghost Ping
+<@&1404184453223284778> — Censor Bot
+<@&1459221881075925177> — MPEG-V
+
+## Archived
+
+<@&1216817126933925920> — dank memer event manager
+<@&1402059899667742913> — Squid Game: Millennica - Player
+<@&1409263735826026627> — Squid Game: Millennica - WINNER
+
+## Uncategorized
+
+<@&1568865023810474095> — MXYZ
+
+## Category Dividers
+
+<@&1216817048676470937> — ⟪⇚― Staff Roles ―⇛⟫
+<@&1216817057958596739> — ‍    ⟪⇚― Main Roles ―⇛⟫    ‍
+<@&1327114197145751693> — •         ⟪⇚― Pinged For ―⇛⟫         •
+<@&1327114490478854174> — •          ⟪⇚― Interests ―⇛⟫          •
+<@&1327116488540422164> — •        ⟪⇚― Communities ―⇛⟫        •
+<@&1330055182062714981> — •         ⟪⇚― About Me ―⇛⟫          •
+<@&1327114834155802665> — ⟪⇚― Gender Roles ―⇛⟫
+<@&1327115194312425472> — ⟪⇚― Religion Roles ―⇛⟫
+<@&1327115781338562671> — ⟪⇚― Ethnicity Roles ―⇛⟫
+<@&1327115526748508282> — •          ⟪⇚― Specials ―⇛⟫          •
+<@&1327846193702633492> — ⟪⇚― Stat(ic)s ―⇛⟫
+<@&1569099069685760090> — ⟪⇚― Linked Roles ―⇛⟫
+<@&1327846322883002490> — ⟪⇚― Bot Roles ―⇛⟫
+<@&1328113301854617721> — ⟪⇚― Archived ―⇛⟫
+<@&1327856882966335560> — ⟪⇚― Uncategorized ―⇛⟫
+
+## Everyone
+
+`@everyone` (1216816878937313442)

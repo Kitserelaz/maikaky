@@ -4,13 +4,16 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/culori": "^4.0.1",
     "@types/express": "^5.0.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^1.1.0",
     "chartjs-to-image": "^1.2.2",
+    "culori": "^4.0.2",
     "discord.js": "^14.17.3",
     "express": "^4.21.2",
     "jszip": "^3.10.1"
