@@ -12,6 +12,7 @@ import { streakLeaderboardCommand } from "./streakLeaderboard.ts";
 import { streakAnnouncementChannelCommand } from "./streakAnnouncements.ts";
 import { linkedRoleRequirementCommand } from "./linkedRolesSetup.ts";
 import { statsRoleCommand } from "./statsRoleSlots.ts";
+import { postRoleInformationCommand } from "./roleInformationSetup.ts";
 import { styleText } from "./formatting.ts";
 import JSZip from "jszip";
 
@@ -378,6 +379,7 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
     streakAnnouncementChannelCommand,
     linkedRoleRequirementCommand,
     statsRoleCommand,
+    postRoleInformationCommand,
     {
         type: ApplicationCommandType.ChatInput,
         name: "activity_chart",

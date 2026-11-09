@@ -5,6 +5,7 @@ export const layoutHeadingText = (
     text: string,
     tiltStrength: number,
     sizeVariation: boolean,
+    targetHeight: number,
 ) => {
     const perCharacter = tiltStrength > 0 || sizeVariation;
     const characters = perCharacter
@@ -55,10 +56,19 @@ export const layoutHeadingText = (
         return characterPosition;
     });
 
+    const height = bottom - top;
+    if (height <= 0) throw new Error("Heading must contain visible text.");
+    const scale = targetHeight / height;
+
     return {
-        width: cursor - gap,
-        height: bottom - top,
-        characters: charactersWithPositions.map(character => ({ ...character, y: character.y - top })),
+        width: (cursor - gap) * scale,
+        height: targetHeight,
+        characters: charactersWithPositions.map(character => ({
+            ...character,
+            x: character.x * scale,
+            y: (character.y - top) * scale,
+            scale: character.scale * scale,
+        })),
     };
 };
 

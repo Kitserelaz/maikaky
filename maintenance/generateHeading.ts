@@ -47,11 +47,12 @@ const font = '160px "Yuruka"';
 const padding = 40;
 const measuringContext = createCanvas(1, 1).getContext("2d");
 measuringContext.font = font;
-const layout = layoutHeadingText(measuringContext, text, tiltStrength, values["size-variation"]);
-const canvas = createCanvas(
-    Math.ceil(layout.width + padding * 2),
-    Math.ceil(layout.height + padding * 2),
-);
+const layout = layoutHeadingText(measuringContext, text, tiltStrength, values["size-variation"], 160);
+const canvas = createCanvas(1800, 240);
+if (layout.width + padding * 2 > canvas.width) {
+    throw new Error("Heading is too wide for the 1800px canvas at 160px text height.");
+}
+
 const context = canvas.getContext("2d");
 
 context.font = font;
