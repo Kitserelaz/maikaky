@@ -5,7 +5,7 @@ House is below.
  :air::oak_log::oak_plank::oak_door_bottom_right::oak_plank::oak_log:
  :grass_block::grass_block::grass_block::grass_block::grass_block::grass_block::grass_block:
 
-## STAFF RANKS
+## STAFF RANKS — #E74C3C
 
 <@&1216817042154459256> — [𝟐𝟗] ✺ 🜲 𝗧𝗵𝘆 𝗧𝗶𝘁𝗮𝗻 🜲 ✺ — Owner
 <@&1216817050157056093> — [𝟐𝟖] ✹ 🜲 𝗧𝗵𝘆-𝗖𝗼-𝗧𝗶𝘁𝗮𝗻 🜲 ✹ — Co-owner
@@ -17,7 +17,7 @@ House is below.
 <@&1216817055408586914> — [𝟏𝟏] ⁑ 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ⁑ — Regular moderator
 <@&1216817056574472282> — [𝟏𝟎] ⁎ 𝗠𝗶𝗻𝗶 𝗢𝗽𝗲𝗿𝗮𝘁𝗼𝗿 ⁎ — Junior moderator
 
-## MAIN ROLES
+## MAIN ROLES — #3498DB
 
 <@&1216817045211971645> — Quarantine
 <@&1216817067009773669> — [𝟖] ✪ 𝗠𝗼𝗱𝗲𝗿𝗮𝘁𝗶𝗼𝗻 𝗯𝗼𝘁𝘀 ✪
@@ -31,7 +31,7 @@ House is below.
 <@&1216817087041769695> — [𝟕] ✩ 𝗙𝘂𝗻 𝗕𝗼𝘁𝘀 ✩
 <@&1216817088069369938> — [𝟕] ✩ 𝗕𝗼𝘁𝘀 ✩
 
-## LEVEL ROLES
+## LEVEL ROLES — #F1C40F
 
 <@&1275815964856029227> — ✰ Level 100: Secret level : Unemployed as Layal
 <@&1275815907326951465> — ✰ Level 90: Affluent Axw
@@ -73,7 +73,7 @@ House is below.
 <@&1275814051892691025> — ★ Level 2: Noob
 <@&1275813685503328307> — ★ Level 1: Crook
 
-## PING ROLES
+## PING ROLES — #E67E22
 
 <@&1216817089151631371> — ┆ New Upload
 <@&1216817090418315395> — ┆ Announcements
@@ -93,7 +93,7 @@ House is below.
 <@&1216817134840315994> — ┆ Bird with balls production ping
 <@&1408472634219565186> — ┆ Viewers War News
 
-## Interests
+## Interests — #2ECC71
 
 <@&1216817100480319628> — ⛏┆ Minecraft
 <@&1216817101256523958> — 🔳┆ Roblox
@@ -109,7 +109,7 @@ House is below.
 <@&1332633605591142400> — 🦉 ┆ Duolingo
 <@&1561414779153817821> — 🪖┆ OpenFront.io
 
-## Communities
+## Communities — #1ABC9C
 
 <@&1223401127278809139> — B*droumer — Archived
 <@&1223401207251603517> — R*iding Community
@@ -126,12 +126,12 @@ House is below.
 <@&1332777823055646751> — Millennish Subcommunity
 <@&1332825321644494969> — RGF Subcommunity
 
-## Genders
+## Genders — #E91E63
 
 <@&1216817096571224126> — 🚻┆Male
 <@&1216817098119053605> — 🚻┆Female
 
-## Religion
+## Religion — #9B59B6
 
 <@&1216817112505651340> — ┆ Christian
 <@&1216817113528795266> — ┆ Muslim
@@ -147,7 +147,7 @@ House is below.
 <@&1216817125394481153> — ┆ Buddhist ping
 <@&1216817128548732978> — ┆ Other religious
 
-## Ethnicity
+## Ethnicity — #16A085
 
 <@&1216817131035820233> — 𝗣𝗼𝗹𝗶𝘀𝗵
 <@&1216817132009029734> — 𝗦𝘄𝗲𝗱𝗶𝘀𝗵
@@ -192,7 +192,7 @@ House is below.
 <@&1313458970056196096> — Georgian
 <@&1313459350014001182> — Armenian
 
-## Events and Specials
+## Events and Specials — #FF6B81
 
 <@&1216817062631047290> — Happy Birthday
 <@&1298212873855832124> — October 2024 Tourney
@@ -201,7 +201,7 @@ House is below.
 <@&1562585458389557369> — THE DON
 <@&1565940566095560815> — MGTV24 Crash Ping
 
-## Statics
+## Statics — #607D8B
 
 <@&1216817162451288164> — Ticket 3
 <@&1216817163592142949> — Ticket 2
@@ -209,7 +209,7 @@ House is below.
 <@&1339492338220929074> — Corpse/Dead account
 <@&1398796382411816971> — Alt account
 
-## Linked Roles
+## Linked Roles — #5865F2
 
 <@&1569098713278980267> — Unclaimed 4 - Click to Claim
 <@&1569098743494746302> — Locked 5 - Not Available
@@ -217,7 +217,7 @@ House is below.
 <@&1569085329846042664> — 66🔥 • Level 52
 <@&1569094733244928000> — 30🔥 • Level 30
 
-## Bot Roles
+## Bot Roles — #00BCD4
 
 <@&1216816981555155114> — Xenon
 <@&1217421745426792491> — Wick
@@ -252,17 +252,17 @@ House is below.
 <@&1404184453223284778> — Censor Bot
 <@&1459221881075925177> — MPEG-V
 
-## Archived
+## Archived — #7F8C8D
 
 <@&1216817126933925920> — dank memer event manager
 <@&1402059899667742913> — Squid Game: Millennica - Player
 <@&1409263735826026627> — Squid Game: Millennica - WINNER
 
-## Uncategorized
+## Uncategorized — #A1887F
 
 <@&1568865023810474095> — MXYZ
 
-## Category Dividers
+## Category Dividers — #546E7A
 
 <@&1216817048676470937> — ⟪⇚― Staff Roles ―⇛⟫
 <@&1216817057958596739> — ‍    ⟪⇚― Main Roles ―⇛⟫    ‍
@@ -280,6 +280,6 @@ House is below.
 <@&1328113301854617721> — ⟪⇚― Archived ―⇛⟫
 <@&1327856882966335560> — ⟪⇚― Uncategorized ―⇛⟫
 
-## Everyone
+## Everyone — #95A5A6
 
 `@everyone` (1216816878937313442)

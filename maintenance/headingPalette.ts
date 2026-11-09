@@ -7,9 +7,9 @@ export const createHeadingPalette = (accent: string | undefined) => {
         return {
             fillTop: "#ff75bf",
             fillBottom: "#ffe0b2",
-            outline: "#8850b5",
+            outline: "#b48cdb",
             innerOutline: "#ffffff",
-            shadow: "#39204f",
+            shadow: "#8b63b0",
             waves: "rgba(255, 250, 224, 0.55)",
         };
     }
@@ -29,9 +29,9 @@ export const createHeadingPalette = (accent: string | undefined) => {
     return {
         fillTop: tone(Math.min(0.8, Math.max(0.68, color.l + 0.05)), 0.85),
         fillBottom: tone(0.88, 0.35),
-        outline: tone(0.44, 1.05),
+        outline: tone(0.68, 1.05),
         innerOutline: tone(0.985, 0.05),
-        shadow: tone(0.25, 0.65),
+        shadow: tone(0.54, 0.65),
         waves: tone(0.99, 0.08, 0.55),
     };
 };
