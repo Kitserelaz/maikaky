@@ -13,6 +13,7 @@ import { streakAnnouncementChannelCommand } from "./streakAnnouncements.ts";
 import { linkedRoleRequirementCommand } from "./linkedRolesSetup.ts";
 import { statsRoleCommand } from "./statsRoleSlots.ts";
 import { postRoleInformationCommand } from "./roleInformationSetup.ts";
+import { unsyncedChannelsCommand } from "./unsyncedChannelsSetup.ts";
 import { styleText } from "./formatting.ts";
 import JSZip from "jszip";
 
@@ -380,6 +381,7 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
     linkedRoleRequirementCommand,
     statsRoleCommand,
     postRoleInformationCommand,
+    unsyncedChannelsCommand,
     {
         type: ApplicationCommandType.ChatInput,
         name: "activity_chart",

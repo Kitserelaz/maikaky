@@ -265,6 +265,12 @@ they must still have **Manage Server**. Channels are checked again before syncin
 channels that moved categories, are already synced, or now have other overwrite
 differences are skipped. The result reports synced, skipped, and failed channels.
 
+Run `/unsynced_channels` with **Manage Server** for a private report of every
+unsynced channel in the server, including channels with differences outside
+stats roles. Each differing role or member overwrite shows the category's and
+channel's allowed and denied permission names. Missing overwrites are shown
+separately from empty overwrites. Long reports are attached as a text file.
+
 Connected members initially publish slot `1`. The first processed claim reserves
 that slot for the claimant, saves the ownership, and renames the role using their
 current streak, longest streak, and Lurkr level: `8🔥21 • Level 23`. When current
