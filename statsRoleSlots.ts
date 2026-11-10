@@ -1,17 +1,21 @@
 import {
+    ActionRowBuilder,
     ApplicationCommandOptionType,
     ApplicationCommandType,
     ApplicationIntegrationType,
+    ButtonBuilder,
+    ButtonStyle,
+    ComponentType,
     Events,
     InteractionContextType,
     MessageFlags,
     PermissionFlagsBits,
 } from "discord.js";
-import type { Client, Guild, GuildMember, RESTPutAPIApplicationCommandsJSONBody } from "discord.js";
+import type { Client, Guild, GuildMember, Message, RESTPutAPIApplicationCommandsJSONBody } from "discord.js";
 import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getNextStatsRoleSlot, getStatsRoleSlot, getStatsRolePositions, parseStatsRoleColor } from "./statsRoleSlotData.ts";
 import type { StatsRoleNaming, StatsRoleSlots } from "./statsRoleSlotData.ts";
 import { setupStatsRoleOverwrites } from "./statsRoleSetup.ts";
-import { auditStatsRoleOverwrites } from "./statsRoleAudit.ts";
+import { auditStatsRoleOverwrites, reconcileStatsRoleOverwrites } from "./statsRoleAudit.ts";
 
 export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
     type: ApplicationCommandType.ChatInput,
@@ -285,16 +289,46 @@ export const startStatsRoleSlots = (
                 const guild = await client.guilds.fetch(guildId);
                 if (interaction.options.getSubcommand() === "audit") {
                     const channels = await auditStatsRoleOverwrites(guild, roleIds);
-                    const summary = `Found ${channels.length} unsynced channels with no category overwrite differences outside configured stats roles.`;
+                    const summary = `Found ${channels.length} unsynced channels with no category overwrite differences outside configured stats roles.` +
+                        (channels.length ? "\nClick Reconcile within 14 minutes to replace their overwrites with their category's overwrites." : "");
                     const content = [summary, ...channels.map(channel => `<#${channel.id}> (category: <#${channel.parentId}>)`)].join("\n");
+                    const targets = channels.map(channel => ({ id: channel.id, parentId: channel.parentId }));
+                    const components = channels.length ? [new ActionRowBuilder<ButtonBuilder>().addComponents(
+                        new ButtonBuilder().setCustomId("stats-role:reconcile").setLabel("Reconcile").setStyle(ButtonStyle.Primary),
+                    )] : [];
+                    let message: Message;
                     if (content.length <= 2000) {
-                        await interaction.editReply({ content, allowedMentions: { parse: [] } });
+                        message = await interaction.editReply({ content, components, allowedMentions: { parse: [] } });
                     } else {
                         const report = channels.map(channel => `${channel.parent!.name} / ${channel.name} (channel: ${channel.id}, category: ${channel.parentId})`).join("\n");
-                        await interaction.editReply({
+                        message = await interaction.editReply({
                             content: `${summary} See the attached list.`,
+                            components,
                             files: [{ attachment: Buffer.from(report, "utf8"), name: "stats-role-audit.txt" }],
                         });
+                    }
+                    if (channels.length === 0) return;
+                    const button = await message.awaitMessageComponent({
+                        componentType: ComponentType.Button,
+                        filter: button => button.customId === "stats-role:reconcile" && button.user.id === interaction.user.id,
+                        time: 14 * 60 * 1000,
+                    }).catch(() => null);
+                    if (!button) {
+                        await interaction.editReply({ components: [] });
+                        return;
+                    }
+                    if (button.guildId !== guildId || !button.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
+                        await button.update({ content: "You need Manage Server in the tracked server to reconcile channels.", components: [], attachments: [] });
+                        return;
+                    }
+                    await button.update({ content: "Reconciling audited channels with their categories…", components: [], attachments: [] });
+                    try {
+                        const currentRoleIds = Object.values(slots).map(slot => slot.roleId);
+                        const { synced, skipped, failed } = await reconcileStatsRoleOverwrites(guild, currentRoleIds, targets);
+                        await button.editReply(`Reconciliation finished: ${synced} channels synced, ${skipped} skipped (already synced or no longer match the audit), ${failed} failed.${failed ? " Check the bot's channel permissions and logs, then rerun /stats-role audit." : ""}`);
+                    } catch {
+                        console.error("[Stats Roles] Could not reconcile audited channel permissions.");
+                        await button.editReply("Could not complete reconciliation. Check the bot's permissions and logs, then rerun /stats-role audit.");
                     }
                     return;
                 }

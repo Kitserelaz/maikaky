@@ -258,7 +258,12 @@ overwrites match their category after excluding configured stats roles. Other
 role and member overwrites must match exactly. Synced channels and channels
 without a category are excluded. The private report lists each matching channel
 and its category, using a text attachment when the list is too long for a message.
-The audit does not change permissions or sync channels.
+When matches are found, click **Reconcile** within 14 minutes to sync the listed
+channels to their categories, replacing their overwrites with the categories'
+overwrites. Only the administrator who ran the audit can use the button, and
+they must still have **Manage Server**. Channels are checked again before syncing;
+channels that moved categories, are already synced, or now have other overwrite
+differences are skipped. The result reports synced, skipped, and failed channels.
 
 Connected members initially publish slot `1`. The first processed claim reserves
 that slot for the claimant, saves the ownership, and renames the role using their

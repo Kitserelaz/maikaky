@@ -24,3 +24,26 @@ export const auditStatsRoleOverwrites = async (guild: Guild, roleIds: string[]) 
     }
     return matches;
 };
+
+export const reconcileStatsRoleOverwrites = async (
+    guild: Guild,
+    roleIds: string[],
+    targets: { id: string; parentId: string | null }[],
+) => {
+    const auditedParents = new Map(targets.map(channel => [channel.id, channel.parentId]));
+    const channels = await auditStatsRoleOverwrites(guild, roleIds);
+    let synced = 0;
+    let failed = 0;
+    for (const channel of channels) {
+        if (auditedParents.get(channel.id) !== channel.parentId) continue;
+        try {
+            await channel.lockPermissions();
+            synced++;
+        } catch (error) {
+            failed++;
+            const code = error instanceof Error && "code" in error ? String(error.code) : "unknown";
+            console.error(`[Stats Roles] Could not sync channel ${channel.id} to its category (code=${code}).`);
+        }
+    }
+    return { synced, skipped: auditedParents.size - synced - failed, failed };
+};

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { ChannelType, Collection, OverwriteType } from "discord.js";
 import type { Guild } from "discord.js";
-import { auditStatsRoleOverwrites } from "./statsRoleAudit.ts";
+import { auditStatsRoleOverwrites, reconcileStatsRoleOverwrites } from "./statsRoleAudit.ts";
 
 test("audit finds only unsynced channels with differences confined to configured stats roles", async () => {
     const overwrite = (id: string, allow = 0n, deny = 0n, type = OverwriteType.Role) => ({
@@ -42,4 +42,45 @@ test("audit finds only unsynced channels with differences confined to configured
     const matches = await auditStatsRoleOverwrites(guild, ["stats", "stats2"]);
     assert.deepEqual(matches.map(item => item.id), ["missing-stats", "empty-stats", "changed-stats", "extra-stats"]);
     assert.deepEqual(await auditStatsRoleOverwrites(guild, []), []);
+});
+
+test("reconcile rechecks audit targets, syncs category overwrites, and continues after failures", async () => {
+    const overwrite = (id: string, allow: bigint) => ({
+        id, type: OverwriteType.Role, allow: { bitfield: allow }, deny: { bitfield: 0n },
+    });
+    const parent = {
+        id: "category",
+        permissionOverwrites: { cache: new Collection([overwrite("other", 1n), overwrite("stats", 2n)].map(item => [item.id, item])) },
+    };
+    const calls: string[] = [];
+    const makeChannel = (id: string) => {
+        const channel = {
+            id, type: ChannelType.GuildText, parentId: parent.id, parent, permissionsLocked: false,
+            permissionOverwrites: { cache: new Collection([["other", overwrite("other", 1n)]]) },
+            lockPermissions: async () => {
+                calls.push(id);
+                if (id === "failed") throw new Error("Missing permissions");
+                channel.permissionOverwrites.cache = parent.permissionOverwrites.cache.clone();
+                channel.permissionsLocked = true;
+            },
+        };
+        return channel;
+    };
+    const failed = makeChannel("failed");
+    const matching = makeChannel("matching");
+    const changed = makeChannel("changed");
+    const moved = makeChannel("moved");
+    const synced = makeChannel("synced");
+    const deleted = makeChannel("deleted");
+    const targets = [failed, matching, changed, moved, synced, deleted].map(channel => ({ id: channel.id, parentId: channel.parentId }));
+    changed.permissionOverwrites.cache.set("other", overwrite("other", 8n));
+    moved.parent = { ...parent, id: "new-category" };
+    moved.parentId = moved.parent.id;
+    synced.permissionsLocked = true;
+    const channels = [failed, matching, changed, moved, synced, makeChannel("not-in-audit")];
+    const guild = { channels: { fetch: async () => new Collection(channels.map(channel => [channel.id, channel])) } } as unknown as Guild;
+    assert.deepEqual(await reconcileStatsRoleOverwrites(guild, ["stats"], targets), { synced: 1, skipped: 4, failed: 1 });
+    assert.deepEqual(calls, ["failed", "matching"]);
+    assert.equal(matching.permissionsLocked, true);
+    assert.deepEqual(matching.permissionOverwrites.cache, parent.permissionOverwrites.cache);
 });
