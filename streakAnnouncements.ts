@@ -12,7 +12,7 @@ import {
 import type { RESTPutAPIApplicationCommandsJSONBody } from "discord.js";
 import client from "./client.ts";
 import { dataContent, saveData } from "./dataMsg.ts";
-import { getStreakHistory } from "./streaks.ts";
+import { getStreakHistory, waitForStreakCatchUp } from "./streaks.ts";
 import { streaksGuildId } from "./streaksData.ts";
 import { formatStreakLeaderboard } from "./streakLeaderboardFormatting.ts";
 
@@ -34,6 +34,7 @@ export const streakAnnouncementChannelCommand: RESTPutAPIApplicationCommandsJSON
 
 let announcementChannelId = dataContent.streakAnnouncementChannelId;
 let timer: ReturnType<typeof setTimeout> | undefined;
+let announcing = false;
 
 const postAnnouncement = async (channelId: string, statusDay?: string) => {
     const history = getStreakHistory();
@@ -47,6 +48,22 @@ const postAnnouncement = async (channelId: string, statusDay?: string) => {
     console.log(`[streaks] Posted the daily leaderboard in #${channel.name}.`);
 };
 
+const postMissedAnnouncement = async () => {
+    if (!announcementChannelId || announcing) return;
+    announcing = true;
+    try {
+        await waitForStreakCatchUp();
+        const completedDay = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+        const lastDay = dataContent.lastStreakAnnouncementDay;
+        if (lastDay && lastDay >= completedDay) return;
+        await postAnnouncement(announcementChannelId, completedDay);
+        dataContent.lastStreakAnnouncementDay = completedDay;
+        await saveData();
+    } finally {
+        announcing = false;
+    }
+};
+
 const scheduleAnnouncement = () => {
     clearTimeout(timer);
     if (!announcementChannelId) return;
@@ -56,12 +73,7 @@ const scheduleAnnouncement = () => {
         // A command may replace the timer while this announcement is being sent.
         timer = undefined;
         try {
-            if (!getStreakHistory()) {
-                console.warn("[streaks] Skipped the daily announcement: streak history has not loaded yet.");
-            } else if (announcementChannelId) {
-                const completedDay = new Date(nextMidnight - 86_400_000).toISOString().slice(0, 10);
-                await postAnnouncement(announcementChannelId, completedDay);
-            }
+            await postMissedAnnouncement();
         } catch (error) {
             console.error("[streaks] Daily leaderboard announcement failed:", error);
         } finally {
@@ -121,4 +133,8 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 });
 
-scheduleAnnouncement();
+void postMissedAnnouncement()
+    .catch(error => console.error("[streaks] Missed leaderboard announcement failed:", error))
+    .finally(() => {
+        if (timer === undefined) scheduleAnnouncement();
+    });

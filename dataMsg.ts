@@ -36,6 +36,7 @@ export const dataContent = JSON.parse(attachmentText) as {
     statsRoleSlots?: StatsRoleSlots,
     statsRoleNaming?: StatsRoleNaming,
     streakAnnouncementChannelId?: Snowflake,
+    lastStreakAnnouncementDay?: string,
     lastRun: string,
     activity: Record<Snowflake, {
         general: {

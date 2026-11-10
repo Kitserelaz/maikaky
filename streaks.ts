@@ -29,9 +29,14 @@ let resolveStreakHistory!: (history: StreakHistory) => void;
 const loadedStreakHistory = new Promise<StreakHistory>(resolve => {
     resolveStreakHistory = resolve;
 });
+let resolveStreakCatchUp!: () => void;
+const initialStreakCatchUp = new Promise<void>(resolve => {
+    resolveStreakCatchUp = resolve;
+});
 
 export const getStreakHistory = () => store?.history;
 export const waitForStreakHistory = () => loadedStreakHistory;
+export const waitForStreakCatchUp = () => initialStreakCatchUp;
 
 const scheduleSave = () => {
     if (!ready || !dirty || writing || saveTimer !== undefined) return;
@@ -84,6 +89,7 @@ const catchUp = async () => {
         bufferedMessages.clear();
         ready = true;
         dirty = true;
+        resolveStreakCatchUp();
         console.log("[streaks] Live tracking is ready.");
     } catch (error) {
         console.error("Streak tracking will retry catch-up in five seconds:", error);
