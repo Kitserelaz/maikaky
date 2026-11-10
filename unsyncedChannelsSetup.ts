@@ -25,7 +25,7 @@ client.on(Events.InteractionCreate, async interaction => {
         await interaction.reply({ content: "You need Manage Server to list unsynced channels.", flags: MessageFlags.Ephemeral });
         return;
     }
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await interaction.deferReply();
     try {
         const guild = await client.guilds.fetch(interaction.guildId);
         const reports = await getUnsyncedChannelsReport(guild);

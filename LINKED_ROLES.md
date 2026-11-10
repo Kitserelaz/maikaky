@@ -256,7 +256,7 @@ and keeps running if an individual channel update fails. It does not shut down t
 Run `/stats-role audit` with **Manage Server** to list unsynced channels whose
 overwrites match their category after excluding configured stats roles. Other
 role and member overwrites must match exactly. Synced channels and channels
-without a category are excluded. The private report lists each matching channel
+without a category are excluded. The public report lists each matching channel
 and its category, using a text attachment when the list is too long for a message.
 When matches are found, click **Reconcile** within 14 minutes to sync the listed
 channels to their categories, replacing their overwrites with the categories'
@@ -265,7 +265,7 @@ they must still have **Manage Server**. Channels are checked again before syncin
 channels that moved categories, are already synced, or now have other overwrite
 differences are skipped. The result reports synced, skipped, and failed channels.
 
-Run `/unsynced_channels` with **Manage Server** for a private report of every
+Run `/unsynced_channels` with **Manage Server** for a public report of every
 unsynced channel in the server, including channels with differences outside
 stats roles. Each differing role or member overwrite shows the category's and
 channel's allowed and denied permission names. Missing overwrites are shown

@@ -271,7 +271,7 @@ export const startStatsRoleSlots = (
             await interaction.reply({ content: "You need Manage Server in the tracked server to configure stats role slots.", flags: MessageFlags.Ephemeral });
             return;
         }
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        await interaction.deferReply(interaction.options.getSubcommand() === "audit" ? {} : { flags: MessageFlags.Ephemeral });
         try {
             if (interaction.options.getSubcommand() === "config" &&
                 interaction.options.getString("claimed_format") === null && interaction.options.getString("unclaimed_format") === null &&
