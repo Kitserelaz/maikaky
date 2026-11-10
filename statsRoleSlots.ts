@@ -11,6 +11,7 @@ import type { Client, Guild, GuildMember, RESTPutAPIApplicationCommandsJSONBody 
 import { canClaimStatsRoleSlot, formatClaimedStatsRoleName, formatUnclaimedStatsRoleName, getNextStatsRoleSlot, getStatsRoleSlot, getStatsRolePositions, parseStatsRoleColor } from "./statsRoleSlotData.ts";
 import type { StatsRoleNaming, StatsRoleSlots } from "./statsRoleSlotData.ts";
 import { setupStatsRoleOverwrites } from "./statsRoleSetup.ts";
+import { auditStatsRoleOverwrites } from "./statsRoleAudit.ts";
 
 export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
     type: ApplicationCommandType.ChatInput,
@@ -24,6 +25,11 @@ export const statsRoleCommand: RESTPutAPIApplicationCommandsJSONBody[number] = {
             type: ApplicationCommandOptionType.Subcommand,
             name: "setup",
             description: "Clear channel permission overwrites for all configured stats roles",
+        },
+        {
+            type: ApplicationCommandOptionType.Subcommand,
+            name: "audit",
+            description: "Find unsynced channels whose only category overwrite differences are stats roles",
         },
         {
             type: ApplicationCommandOptionType.Subcommand,
@@ -270,13 +276,28 @@ export const startStatsRoleSlots = (
                 await interaction.editReply("No settings supplied; nothing changed.");
                 return;
             }
-            if (interaction.options.getSubcommand() === "setup") {
+            if (interaction.options.getSubcommand() === "setup" || interaction.options.getSubcommand() === "audit") {
                 const roleIds = [...new Set(Object.values(slots).map(slot => slot.roleId))];
                 if (roleIds.length === 0) {
                     await interaction.editReply("No stats roles are configured. Add them with /stats-role slot first.");
                     return;
                 }
                 const guild = await client.guilds.fetch(guildId);
+                if (interaction.options.getSubcommand() === "audit") {
+                    const channels = await auditStatsRoleOverwrites(guild, roleIds);
+                    const summary = `Found ${channels.length} unsynced channels with no category overwrite differences outside configured stats roles.`;
+                    const content = [summary, ...channels.map(channel => `<#${channel.id}> (category: <#${channel.parentId}>)`)].join("\n");
+                    if (content.length <= 2000) {
+                        await interaction.editReply({ content, allowedMentions: { parse: [] } });
+                    } else {
+                        const report = channels.map(channel => `${channel.parent!.name} / ${channel.name} (channel: ${channel.id}, category: ${channel.parentId})`).join("\n");
+                        await interaction.editReply({
+                            content: `${summary} See the attached list.`,
+                            files: [{ attachment: Buffer.from(report, "utf8"), name: "stats-role-audit.txt" }],
+                        });
+                    }
+                    return;
+                }
                 const { cleared, skipped, failed } = await setupStatsRoleOverwrites(guild, roleIds);
                 await interaction.editReply(`Stats role setup finished for ${roleIds.length} roles: ${cleared} permission overwrites cleared, ${skipped} already empty, ${failed} failed.${failed ? " Check the bot's channel permissions and logs, then rerun /stats-role setup." : ""}`);
                 return;

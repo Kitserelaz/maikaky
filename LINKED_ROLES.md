@@ -253,6 +253,13 @@ not edited. The bot needs permission to manage overwrites in the target channels
 The command reports successful and failed overwrites, logs each channel result,
 and keeps running if an individual channel update fails. It does not shut down the bot.
 
+Run `/stats-role audit` with **Manage Server** to list unsynced channels whose
+overwrites match their category after excluding configured stats roles. Other
+role and member overwrites must match exactly. Synced channels and channels
+without a category are excluded. The private report lists each matching channel
+and its category, using a text attachment when the list is too long for a message.
+The audit does not change permissions or sync channels.
+
 Connected members initially publish slot `1`. The first processed claim reserves
 that slot for the claimant, saves the ownership, and renames the role using their
 current streak, longest streak, and Lurkr level: `8🔥21 • Level 23`. When current
