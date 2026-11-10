@@ -29,47 +29,6 @@
 
 <@&1275814472925184130> — Gives you ability to support MGTVNews on any server
 
-## PING ROLES — #E67E22
-
-<@&1216817089151631371> - When the server owner uploads a new video
-<@&1216817090418315395> - When there is a server annoucement
-<@&1216817091319959773> - For chat revivals and sometimes events
-<@&1216817091974266881> - For public votings
-<@&1216817093631017083> - Archived
-<@&1216817099570417724> - For facts of this community
-<@&1216817095740887080> — Archived
-<@&1216817137461628998> - For server updates
-<@&1216817138573250570> - Archived
-<@&1216817143799218286> - Activities
-<@&1216817149335703572> - For MGTV24 news posts
-<@&1216817155723497642> — Archived
-<@&1225277158134517810> - Self-explanatory; anyone can ping it
-<@&1216817109133426768> — Archived
-<@&1234267903562481705> - For when a new member joins
-<@&1216817134840315994> - For the "Bird with balls productions" sh*tposts
-<@&1408472634219565186> - For news on Viewers War
-
-## Interests — #2ECC71
-
-<@&1216817100480319628> - A game
-<@&1216817101256523958> - Another game
-<@&1216817102351106151> - Oh look, another game!
-<@&1216817104246804634> — Archived
-<@&1216817105698029578> - Meow?
-<@&1216817106746605638> - No meow? Woof?
-<@&1216817110257373275> — Archived
-<@&1224928136945209355> — Archived
-<@&1232948143310639145> - How many games are there?
-<@&1296322210394542170> - Hacking, coding, etc.
-<@&1327113534219358351> - Art, etc.
-<@&1332633605591142400> - Owl wants language?
-<@&1561414779153817821> - Another game?
-
-## Genders — #E91E63
-
-<@&1216817096571224126>
-<@&1216817098119053605>
-
 ## Events and Specials — #FF6B81
 
 <@&1216817062631047290> - Given to people when it's their birthday
@@ -96,11 +55,11 @@
 
 ## Excluded — #546E7A
 
-### Everyone
+### Everyone — #95A5A6
 
 `@everyone` (1216816878937313442)
 
-### LEVEL ROLES
+### LEVEL ROLES — #F1C40F
 
 <@&1275815964856029227>
 <@&1275815907326951465>
@@ -141,7 +100,7 @@
 <@&1275814051892691025>
 <@&1275813685503328307>
 
-### Ethnicity
+### Ethnicity — #16A085
 
 <@&1216817131035820233>
 <@&1216817132009029734>
@@ -186,7 +145,7 @@
 <@&1313458970056196096>
 <@&1313459350014001182>
 
-### Linked Roles
+### Linked Roles — #5865F2
 
 <@&1569098713278980267>
 <@&1569098743494746302>
@@ -194,7 +153,7 @@
 <@&1569085329846042664>
 <@&1569094733244928000>
 
-### Bot Roles
+### Bot Roles — #00BCD4
 
 <@&1216816981555155114>
 <@&1217421745426792491>
@@ -228,7 +187,7 @@
 <@&1404184453223284778>
 <@&1459221881075925177>
 
-### Category Dividers
+### Category Dividers — #546E7A
 
 <@&1216817048676470937>
 <@&1216817057958596739>
@@ -246,7 +205,7 @@
 <@&1328113301854617721>
 <@&1327856882966335560>
 
-### Communities
+### Communities — #1ABC9C
 
 <@&1223401127278809139> — Archived
 <@&1223401207251603517>
@@ -263,7 +222,7 @@
 <@&1332777823055646751>
 <@&1332825321644494969>
 
-### Religion
+### Religion — #9B59B6
 
 <@&1216817112505651340>
 <@&1216817113528795266>
@@ -278,3 +237,44 @@
 <@&1216817124308156526>
 <@&1216817125394481153>
 <@&1216817128548732978>
+
+### PING ROLES — #E67E22
+
+<@&1216817089151631371> - When the server owner uploads a new video
+<@&1216817090418315395> - When there is a server annoucement
+<@&1216817091319959773> - For chat revivals and sometimes events
+<@&1216817091974266881> - For public votings
+<@&1216817093631017083> - Archived
+<@&1216817099570417724> - For facts of this community
+<@&1216817095740887080> — Archived
+<@&1216817137461628998> - For server updates
+<@&1216817138573250570> - Archived
+<@&1216817143799218286> - Activities
+<@&1216817149335703572> - For MGTV24 news posts
+<@&1216817155723497642> — Archived
+<@&1225277158134517810> - Self-explanatory; anyone can ping it
+<@&1216817109133426768> — Archived
+<@&1234267903562481705> - For when a new member joins
+<@&1216817134840315994> - For the "Bird with balls productions" sh*tposts
+<@&1408472634219565186> - For news on Viewers War
+
+### Interests — #2ECC71
+
+<@&1216817100480319628> - A game
+<@&1216817101256523958> - Another game
+<@&1216817102351106151> - Oh look, another game!
+<@&1216817104246804634> — Archived
+<@&1216817105698029578> - Meow?
+<@&1216817106746605638> - No meow? Woof?
+<@&1216817110257373275> — Archived
+<@&1224928136945209355> — Archived
+<@&1232948143310639145> - How many games are there?
+<@&1296322210394542170> - Hacking, coding, etc.
+<@&1327113534219358351> - Art, etc.
+<@&1332633605591142400> - Owl wants language?
+<@&1561414779153817821> - Another game?
+
+### Genders — #E91E63
+
+<@&1216817096571224126>
+<@&1216817098119053605>

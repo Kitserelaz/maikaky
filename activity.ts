@@ -73,10 +73,9 @@ const updateActivity = async (userId: Snowflake, kind: "status" | "chat") => {
 const newHour = async () => {
     for (const [id, oauthGuild] of await client.guilds.fetch()) {
         const guild = await oauthGuild.fetch();
-        for (const member of (await guild.members.fetch()).values()) {
-            if (!member.presence) continue;
-            if (member.presence.status === "offline") continue;
-            updateActivity(member.id, "status");
+        for (const presence of guild.presences.cache.values()) {
+            if (presence.status === "offline") continue;
+            updateActivity(presence.userId, "status");
         }
     }
     dataContent.lastStatusUpdate = getCurrentHour();
