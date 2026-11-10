@@ -50,9 +50,14 @@ export const formatStreakLeaderboard = (
             index = end;
         }
     }
-    const heading = sections.length
-        ? "**Message streak leaderboard**"
-        : "No message streaks have been recorded yet.";
+    const dateLabel = new Date(statusDay).toLocaleDateString("en-US", {
+        timeZone: "UTC", month: "short", day: "numeric", year: "numeric",
+    });
+    const leaderboardDay = (Date.parse(statusDay) - Date.UTC(2026, 10, 8)) / 86_400_000 + 1;
+    const heading = [
+        sections.length ? "**Message streak leaderboard**" : "No message streaks have been recorded yet.",
+        `${dateLabel} (UTC) · Day ${leaderboardDay}`,
+    ].join("\n");
     if (!showPagination) return {
         content: [heading, ...sections.map(section => section.content)].join("\n\n"),
         allowedMentions: { parse: [] },
