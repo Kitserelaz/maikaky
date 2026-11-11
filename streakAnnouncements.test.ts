@@ -33,14 +33,17 @@ test("missed daily announcements wait for catch-up, persist their day, and survi
     const errors = spyOn(console, "error").mockImplementation(() => {});
     mock.module("./client.ts", () => ({ default: client }));
     mock.module("./dataMsg.ts", () => ({ dataContent, saveData }));
-    mock.module("./streaksDiscord.ts", () => ({ isStreakStorageMessage: () => false }));
+    mock.module("./streaksDiscord.ts", () => ({
+        isStreakStorageMessage: () => false,
+        saveDiscordStreakSnapshot: async () => {},
+    }));
     mock.module("./streaksData.ts", () => ({
         streaksGuildId: guildId,
         loadStreakHistory: async () => ({ history }),
         catchUpStreakHistory: async () => catchingUp,
         addStreakMessage: () => false,
         serializeStreakHistory: () => JSON.stringify(history),
-        saveStreakHistory: async () => {},
+        saveLocalStreakSnapshot: async () => {},
     }));
 
     try {

@@ -1,11 +1,11 @@
 import { Events, type Message } from "discord.js";
 import client from "./client.ts";
-import { isStreakStorageMessage } from "./streaksDiscord.ts";
+import { isStreakStorageMessage, saveDiscordStreakSnapshot } from "./streaksDiscord.ts";
 import {
     addStreakMessage,
     catchUpStreakHistory,
     loadStreakHistory,
-    saveStreakHistory,
+    saveLocalStreakSnapshot,
     serializeStreakHistory,
     streaksGuildId,
     type StreakHistory,
@@ -13,11 +13,14 @@ import {
 } from "./streaksData.ts";
 
 const saveInterval = 5_000;
+const streakUploadInterval = 2 * 60 * 60 * 1000;
 const bufferedMessages = new Map<string, Message>();
 let store: StreakStore | undefined;
 let ready = false;
 let dirty = false;
 let writing = false;
+let backupSnapshot: string | undefined;
+let backingUp = false;
 let lastSavedAt = 0;
 let retrySaveAfter = 0;
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -58,7 +61,8 @@ const flush = async () => {
     dirty = false;
     try {
         const snapshot = serializeStreakHistory(store.history);
-        await saveStreakHistory(snapshot);
+        await saveLocalStreakSnapshot(snapshot);
+        backupSnapshot = snapshot;
         lastSavedAt = Date.now();
         retrySaveAfter = 0;
         if (dirty) console.log("[streaks] Messages arrived during the save; another save is pending.");
@@ -128,3 +132,17 @@ client.on(Events.MessageCreate, message => {
 client.on(Events.ShardReady, requestCatchUp);
 client.on(Events.ShardResume, requestCatchUp);
 requestCatchUp();
+
+setInterval(async () => {
+    if (backupSnapshot === undefined || backingUp) return;
+    backingUp = true;
+    const snapshot = backupSnapshot;
+    try {
+        await saveDiscordStreakSnapshot(snapshot);
+        if (backupSnapshot === snapshot) backupSnapshot = undefined;
+    } catch (error) {
+        console.error("Failed to back up streak history to Discord; will retry in two hours:", error);
+    } finally {
+        backingUp = false;
+    }
+}, streakUploadInterval).unref();

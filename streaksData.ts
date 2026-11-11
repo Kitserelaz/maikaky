@@ -26,7 +26,7 @@ export type StreakStore = {
     checkpoints: Map<string, bigint>;
 };
 
-const saveLocalStreakSnapshot = async (snapshot: string) => {
+export const saveLocalStreakSnapshot = async (snapshot: string) => {
     await writeFile("streaks.json.tmp", snapshot, "utf8");
     await rename("streaks.json.tmp", "streaks.json");
 };
