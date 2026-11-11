@@ -1,5 +1,5 @@
 // Require the necessary discord.js classes
-import { Client, GatewayIntentBits, Events, RESTEvents } from 'discord.js';
+import { Client, DefaultRestOptions, GatewayIntentBits, Events, RESTEvents } from 'discord.js';
 
 // Create a new client instance
 const client = new Client({
@@ -8,6 +8,24 @@ GatewayIntentBits.Guilds,
 GatewayIntentBits.GuildMessages,
 GatewayIntentBits.GuildPresences,
 GatewayIntentBits.MessageContent],
+    rest: {
+      makeRequest: async (url, options) => {
+        if (!url.endsWith("/gateway/bot")) return DefaultRestOptions.makeRequest(url, options);
+
+        const startedAt = Date.now();
+        console.log("[Discord] Requesting Gateway discovery (GET /gateway/bot).");
+        try {
+          const response = await DefaultRestOptions.makeRequest(url, options);
+          console.log(`[Discord] Gateway discovery responded HTTP ${response.status} after ${Date.now() - startedAt} ms.`);
+          return response;
+        } catch (error) {
+          const name = error instanceof Error ? error.name : "Unknown error";
+          const code = error instanceof Error && "code" in error ? ` (${String(error.code)})` : "";
+          console.error(`[Discord] Gateway discovery request failed after ${Date.now() - startedAt} ms: ${name}${code}.`);
+          throw error;
+        }
+      },
+    },
   }); // creates a new bot client
 
 client.once(Events.ClientReady, c => {
