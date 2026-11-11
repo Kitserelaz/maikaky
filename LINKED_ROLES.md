@@ -7,7 +7,8 @@ steps and OAuth settings; its `LINKED_ROLES.md` covers role setup and commands.
 On the Maikaky host, keep the existing `LURKR_API_KEY`, main bot `token`, and streak
 configuration. Set `STATS_API_TOKEN` to a dedicated random secret shared with
 Remyne. Expose `GET /internal/stats/:userId` over HTTPS from Maikaky's Express server
-on port 3000. Remyne sends the secret as an `Authorization: Bearer` header.
+on Render's `PORT` (3000 locally). Remyne sends the secret as an
+`Authorization: Bearer` header.
 
 The response contains `currentStreak`, `longestStreak`, and `level` for the tracked
 server. Streaks come from loaded in-memory history and are calculated on request.
