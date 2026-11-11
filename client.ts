@@ -17,6 +17,13 @@ GatewayIntentBits.MessageContent],
         try {
           const response = await DefaultRestOptions.makeRequest(url, options);
           console.log(`[Discord] Gateway discovery responded HTTP ${response.status} after ${Date.now() - startedAt} ms.`);
+          if (response.status === 429) {
+            const retryAfter = response.headers.get("Retry-After") ?? "missing";
+            const scope = response.headers.get("X-RateLimit-Scope") ?? "missing";
+            const contentType = response.headers.get("Content-Type") ?? "missing";
+            const ray = response.headers.get("CF-Ray") ?? "missing";
+            console.warn(`[Discord] Gateway discovery 429: Retry-After=${retryAfter}, scope=${scope}, content-type=${contentType}, CF-Ray=${ray}.`);
+          }
           return response;
         } catch (error) {
           const name = error instanceof Error ? error.name : "Unknown error";
