@@ -10,8 +10,6 @@ import { serverIndexCommands } from "./serverIndexSetup.ts";
 import { leaderboardCommand } from "./leaderboard.ts";
 import { streakLeaderboardCommand } from "./streakLeaderboard.ts";
 import { streakAnnouncementChannelCommand } from "./streakAnnouncements.ts";
-import { linkedRoleRequirementCommand } from "./linkedRolesSetup.ts";
-import { statsRoleCommand } from "./statsRoleSlots.ts";
 import { postRoleInformationCommand } from "./roleInformationSetup.ts";
 import { unsyncedChannelsCommand } from "./unsyncedChannelsSetup.ts";
 import { styleText } from "./formatting.ts";
@@ -378,8 +376,6 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
     leaderboardCommand,
     streakLeaderboardCommand,
     streakAnnouncementChannelCommand,
-    linkedRoleRequirementCommand,
-    statsRoleCommand,
     postRoleInformationCommand,
     unsyncedChannelsCommand,
     {
@@ -691,4 +687,6 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
     },
 ]
 if (!client.application) throw new Error("No application for client?")
-await client.rest.put(Routes.applicationCommands(client.application.id), {"body": commands})
+for (const command of commands) {
+    await client.rest.post(Routes.applicationCommands(client.application.id), { body: command });
+}

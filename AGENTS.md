@@ -11,6 +11,7 @@
 * Keep future proofing in mind.
 * Keep utility functions in a separate file.
 * Keep code modular by separating unrelated responsibilities.
+* Consider merging code files shorter than a few dozen lines into a closely related file when it improves readability.
 * Keep CSS and styling simple and intentional. Avoid unnecessary visual complexity.
 * Keep styling close to the component when it is component-specific. Move shared or large styling into CSS files.
 * Do not start development servers or manually test the application. Assume the person prompting will verify changes.
