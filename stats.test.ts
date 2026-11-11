@@ -1,11 +1,38 @@
 import assert from "node:assert/strict";
-import { test } from "bun:test";
+import { EventEmitter } from "node:events";
+import type { Server } from "node:http";
+import { spyOn, test } from "bun:test";
 import type { Express, Request, Response } from "express";
+import { WebSocketServer } from "ws";
 import { createStatsReader, registerStatsEndpoint } from "./stats.ts";
+import { registerStatsEvents } from "./statsEvents.ts";
 import type { LurkrUserLevelResponse } from "./lurkr.ts";
 import type { StreakHistory } from "./streaksData.ts";
 
 const userId = "123456789012345678";
+
+test("stats events upgrade only the authenticated WebSocket route", () => {
+    const server = new EventEmitter();
+    const upgrade = spyOn(WebSocketServer.prototype, "handleUpgrade").mockImplementation(() => {});
+    registerStatsEvents(server as Server, "test-token");
+    const tryUpgrade = (url: string, authorization?: string) => {
+        let response: string | undefined;
+        const socket = { end: (value: string) => { response = value; } };
+        server.emit("upgrade", { url, headers: { authorization } }, socket, Buffer.alloc(0));
+        return response;
+    };
+    try {
+        assert.match(tryUpgrade("/internal/stats/events")!, /^HTTP\/1\.1 401 /);
+        assert.match(tryUpgrade("/internal/stats/events", "Bearer fake-token")!, /^HTTP\/1\.1 401 /);
+        assert.match(tryUpgrade("/", "Bearer test-token")!, /^HTTP\/1\.1 404 /);
+        assert.equal(upgrade.mock.calls.length, 0);
+        assert.equal(tryUpgrade("/internal/stats/events", "Bearer test-token"), undefined);
+        assert.equal(upgrade.mock.calls.length, 1);
+    } finally {
+        server.emit("close");
+        upgrade.mockRestore();
+    }
+});
 
 test("stats endpoint protects live stats and distinguishes missing data from an outage", async () => {
     let handler!: (req: Request, res: Response) => Promise<void>;

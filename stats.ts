@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import type { Express } from "express";
-import { calculateStreak } from "./maintenance/messageStreakCalculations.ts";
+import { calculateUserStreak } from "./maintenance/messageStreakCalculations.ts";
 import type { StreakHistory } from "./streaksData.ts";
 import type { LurkrUserLevelResponse } from "./lurkr.ts";
 
@@ -14,10 +14,7 @@ type StatsDependencies = {
 export const createStatsReader = ({ getHistory, getLevel }: StatsDependencies) => async (userId: string): Promise<Stats> => {
     const history = getHistory();
     if (!history) throw new Error("Streak history is not loaded.");
-    const days = history.users[userId]?.days;
-    const timestamps = new Set(Object.values(days ?? {}).flatMap(day =>
-        day.timestamps.map(timestamp => Date.parse(timestamp))));
-    const streak = timestamps.size > 0 ? calculateStreak(timestamps) : { current: 0, longest: 0 };
+    const streak = calculateUserStreak(history.users[userId]?.days);
     let level = 0;
     try {
         level = (await getLevel(userId)).level.level;
@@ -27,13 +24,20 @@ export const createStatsReader = ({ getHistory, getLevel }: StatsDependencies) =
     return { currentStreak: streak.current, longestStreak: streak.longest, level };
 };
 
-export const registerStatsEndpoint = (app: Express, token: string, getStats: (userId: string) => Promise<Stats>) => {
+export const createStatsAuthorizer = (token: string) => {
     if (!token.trim()) throw new Error("STATS_API_TOKEN is required.");
     const expected = Buffer.from(`Bearer ${token}`);
+    return (header: string | undefined) => {
+        const authorization = Buffer.from(header ?? "");
+        return authorization.length === expected.length && timingSafeEqual(authorization, expected);
+    };
+};
+
+export const registerStatsEndpoint = (app: Express, token: string, getStats: (userId: string) => Promise<Stats>) => {
+    const isAuthorized = createStatsAuthorizer(token);
     app.get("/internal/stats/:userId", async (req, res) => {
         res.set("Cache-Control", "no-store");
-        const authorization = Buffer.from(req.get("Authorization") ?? "");
-        if (authorization.length !== expected.length || !timingSafeEqual(authorization, expected)) {
+        if (!isAuthorized(req.get("Authorization"))) {
             res.status(401).json({ error: "Unauthorized" });
             return;
         }

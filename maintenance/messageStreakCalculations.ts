@@ -30,3 +30,9 @@ export const calculateStreak = (timestamps: Set<number>) => {
     const lastDay = new Date(lastTimestamp).toISOString().slice(0, 10);
     return { current, longest, startTimestamp, lastDay, status };
 };
+
+export const calculateUserStreak = (days: Record<string, { timestamps: string[] }> | undefined) => {
+    const timestamps = new Set(Object.values(days ?? {}).flatMap(day =>
+        day.timestamps.map(timestamp => Date.parse(timestamp))));
+    return timestamps.size > 0 ? calculateStreak(timestamps) : { current: 0, longest: 0 };
+};

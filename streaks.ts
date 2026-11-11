@@ -1,6 +1,8 @@
+import { EventEmitter } from "node:events";
 import { Events, type Message } from "discord.js";
 import client from "./client.ts";
 import { isStreakStorageMessage, saveDiscordStreakSnapshot } from "./streaksDiscord.ts";
+import { calculateUserStreak } from "./maintenance/messageStreakCalculations.ts";
 import {
     addStreakMessage,
     catchUpStreakHistory,
@@ -38,6 +40,7 @@ const initialStreakCatchUp = new Promise<void>(resolve => {
 });
 
 export const getStreakHistory = () => store?.history;
+export const streakEvents = new EventEmitter<{ change: [userId: string] }>();
 export const waitForStreakHistory = () => loadedStreakHistory;
 export const waitForStreakCatchUp = () => initialStreakCatchUp;
 
@@ -121,11 +124,19 @@ client.on(Events.MessageCreate, message => {
         console.log(`[streaks] Buffered message ${message.id} in channel ${message.channelId}; ${bufferedMessages.size} buffered messages.`);
         return;
     }
+    const userId = message.author.id;
+    const days = store.history.users[userId]?.days;
+    const day = new Date(message.createdTimestamp).toISOString().slice(0, 10);
+    const before = !message.author.bot && !days?.[day] ? calculateUserStreak(days) : undefined;
     const changed = addStreakMessage(store, message);
     console.log(`[streaks] Live message ${message.id} from ${message.author.tag} in channel ${message.channelId}: ${changed ? "history updated" : "no history changes (bot or duplicate)"}.`);
     if (changed) {
         dirty = true;
         scheduleSave();
+        if (before && store.history.users[userId]?.days[day]) {
+            const after = calculateUserStreak(store.history.users[userId]?.days);
+            if (after.current !== before.current || after.longest !== before.longest) streakEvents.emit("change", userId);
+        }
     }
 });
 
