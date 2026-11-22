@@ -1,6 +1,14 @@
 // Require the necessary discord.js classes
 import { Client, DefaultRestOptions, GatewayIntentBits, Events, RESTEvents } from 'discord.js';
 
+import { DefaultWebSocketManagerOptions } from 'discord.js';
+
+Object.assign(DefaultWebSocketManagerOptions.identifyProperties, {
+  os: 'Android',
+  browser: 'Discord VR',
+  device: 'Meta Quest',
+});
+
 // Create a new client instance
 const client = new Client({
     intents: [GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration,
@@ -34,6 +42,7 @@ GatewayIntentBits.MessageContent],
       },
     },
   }); // creates a new bot client
+
 
 client.once(Events.ClientReady, c => {
   console.log(`Ready! Logged in as ${c.user.tag}`);

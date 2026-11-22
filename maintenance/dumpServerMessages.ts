@@ -7,7 +7,7 @@ const channel = await client.channels.fetch(channelId);
 if (!(channel instanceof BaseGuildTextChannel)) throw new Error(`${channelId} is not a text channel.`);
 console.log(`Reading #${channel.name} (${channel.id})...`);
 
-const messages: { channel: string; timestamp: number; author: string; content: string }[] = [];
+const messages: { channel: string; timestamp: number; author: string; content: string, id: string }[] = [];
 
 let before: string | undefined;
 let page = 0;
@@ -23,6 +23,7 @@ while (true) {
             timestamp: message.createdTimestamp,
             author: message.author.tag,
             content: message.content,
+            id: message.id
         });
     }
 
@@ -35,7 +36,7 @@ console.log(`Finished fetching ${messages.length} message(s) across ${page} page
 console.log(`Sorting ${messages.length} message(s) by timestamp...`);
 messages.sort((a, b) => a.timestamp - b.timestamp);
 const output = messages.map(message =>
-    `[${new Date(message.timestamp).toISOString()}] ${message.channel} | ${message.author}\n${message.content}`
+    `[${new Date(message.timestamp).toISOString()}] ${message.channel} | ${message.author} | https://mgtv24.onrender.com/posts/${message.id}\n${message.content}`
 ).join("\n\n");
 const filename = `messages-${channelId}.txt`;
 

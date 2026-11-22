@@ -686,7 +686,8 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
         ]
     },
 ]
+/*
 if (!client.application) throw new Error("No application for client?")
 for (const command of commands) {
     await client.rest.post(Routes.applicationCommands(client.application.id), { body: command });
-}
+}*/
